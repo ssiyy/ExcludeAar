@@ -7,4 +7,4 @@ def initGradleEnvironment() {
 
 initGradleEnvironment()
 
-include ':app'
+include ':app', ':library'
