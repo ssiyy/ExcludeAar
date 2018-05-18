@@ -1,4 +1,4 @@
-# 一个用于过滤AAR包中冗余或者冲突类的gradle脚本
+# 一个用于过滤AAR(Jar)包中冗余或者冲突类的gradle脚本
 
 ## Demo截图
 ![demo](./img/demo.png)
