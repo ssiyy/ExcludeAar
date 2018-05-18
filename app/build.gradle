@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 27
@@ -14,27 +15,39 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
+
+    signingConfigs {
+        keyTest {
+            keyAlias  gradle.keyAlias
+            keyPassword gradle.keyPassword
+            storeFile file('.jks')
+            storePassword gradle.storePassword
+            v2SigningEnabled false
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt')
             resValue "string", "baiduKey", gradle.baidukey
+            signingConfig signingConfigs.keyTest
         }
         debug{
             resValue "string", "baiduKey", gradle.baidukey
+            signingConfig signingConfigs.keyTest
         }
     }
 }
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.android.support.constraint:constraint-layout:1.1.0'
-    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    testImplementation 'junit:junit:4.12'
     implementation 'com.android.support:appcompat-v7:27.1.1'
+    testImplementation 'junit:junit:4.12'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+    implementation project(path: ':library-exclude', configuration: 'exclude')
+//    implementation project(":library")
 }
 
 

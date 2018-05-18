@@ -3,8 +3,11 @@ def initGradleEnvironment() {
     File propertyFile = new File(rootDir.getAbsolutePath() + "/local.properties")
     properties.load(propertyFile.newDataInputStream())
     gradle.ext.baidukey = properties.getProperty('baidukey')
+    gradle.ext.keyAlias = properties.getProperty('keyAlias')
+    gradle.ext.keyPassword = properties.getProperty('keyPassword')
+    gradle.ext.storePassword = properties.getProperty('storePassword')
 }
 
 initGradleEnvironment()
 
-include ':app', ':library'
+include ':app', ':library', ':library-exclude'
