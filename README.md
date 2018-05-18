@@ -95,10 +95,6 @@ def excludePackages = []
 //需要过滤的类(需要全类名)
 def excludeClasses = []
 
-def unZipAarFile = new File(buildDir, "unzipaar")
-def unZipJarFile = new File(buildDir, 'unzipjar')
-def excludeAarFile = new File(buildDir, "excludeaar")
-def excludeAarName = "exclude_${getDefaultAar().name.replaceFirst(~/\.[^.]+$/, '')}"
 static def getExcludePackageRegex(def packages) {
     packages?.collect {
         it?.replace('.', '\\')?.plus("\\**")
