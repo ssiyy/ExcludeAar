@@ -9,3 +9,8 @@
 /.idea
 /.gradle
 /library-exclude/build/
+/buildSrc/build/classes/kotlin/main/
+/buildSrc/build/kotlin/
+/buildSrc/build/libs/
+/buildSrc/build/resources/main/META-INF/gradle-plugins/
+/buildSrc/build/tmp/jar/
