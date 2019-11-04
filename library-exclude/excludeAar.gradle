@@ -1,11 +1,12 @@
-configurations {
-    exclude
-}
-
 //需要过滤的包名
 def excludePackages = ['com.baidu']
 //需要过滤的类(需要全类名)
 def excludeClasses = []
+
+//这么写也可以 configurations.maybeCreate("exclude")
+configurations {
+    exclude
+}
 
 task printMsg {
     group "Siy"
@@ -77,6 +78,8 @@ task excludeAar(type: Zip) {
 
 excludeAar.dependsOn zipJar
 
+
+//这么写也可以 artifacts.add("exclude", excludeAar)
 artifacts {
     exclude excludeAar
 }
