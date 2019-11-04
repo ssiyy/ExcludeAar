@@ -1,7 +1,7 @@
 package coder.siy.test
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import com.example.library.BaiduLocationService
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity() {
         locService.listener = { latitude/*获取纬度信息*/, longitude/*获取经度信息*/, _, locType/*错误码*/ ->
             latitudeTv.text = "纬度：$latitude"
             longitudeTv.text = "经度：$longitude"
-            locTypeTv.text = "错误吗：$locType"
+            locTypeTv.text = "错误码：$locType"
         }
 
     }
