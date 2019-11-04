@@ -4,8 +4,6 @@ apply plugin: 'kotlin-android'
 android {
     compileSdkVersion 29
 
-
-
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 29
@@ -20,6 +18,17 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    //更改生成的aar包的名称
+    libraryVariants.all { variant ->
+        variant.outputs.all { output ->
+            if ('release' == variant.buildType.name) {
+                outputFileName = "BaiduLBS_Android_release.aar"
+            } else if ('debug' == variant.buildType.name) {
+                outputFileName = "BaiduLBS_Android_debug.aar"
+            }
         }
     }
 

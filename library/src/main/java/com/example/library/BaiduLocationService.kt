@@ -23,8 +23,8 @@ import com.baidu.location.LocationClientOption
  * @author Siy
  * @date 2018/5/17.
  */
-class BaiduLocationService(content: Context) {
-    private val mLocationClient: LocationClient = LocationClient(content)
+class BaiduLocationService(context: Context) {
+    private val mLocationClient: LocationClient = LocationClient(context)
 
     var listener: ((Double?, Double?, Float?, Int?) -> Unit)? = null
 
@@ -35,9 +35,18 @@ class BaiduLocationService(content: Context) {
         }
     }
 
-    fun start() = mLocationClient.start()
+    fun start() {
+        if (!mLocationClient.isStarted) {
+            mLocationClient.start()
+        }
 
-    fun stop() = mLocationClient.stop()
+    }
+
+    fun stop() {
+        if (mLocationClient.isStarted) {
+            mLocationClient.stop()
+        }
+    }
 
     private fun initOption() {
         val option = LocationClientOption()

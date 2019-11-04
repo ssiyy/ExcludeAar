@@ -34,6 +34,7 @@ android {
             signingConfig signingConfigs.keyTest
         }
         debug{
+            minifyEnabled false
             resValue "string", "baiduKey", gradle.baidukey
             signingConfig signingConfigs.keyTest
         }

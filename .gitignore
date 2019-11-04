@@ -8,3 +8,4 @@
 .externalNativeBuild
 /.idea
 /.gradle
+/library-exclude/build/
