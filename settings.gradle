@@ -10,4 +10,8 @@ def initGradleEnvironment() {
 
 initGradleEnvironment()
 
-include ':exclude-aar', ':libraries:library', ':libraries:library-exclude-aar', ':exclude-jar'
+include ':exclude-aar-demo',
+        ':exclude-jar-demo',
+        ':libraries:library',
+        ':libraries:library-exclude-aar',
+        ':libraries:library-exclude-jar'

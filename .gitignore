@@ -14,3 +14,5 @@
 /buildSrc/build/libs/
 /buildSrc/build/resources/main/META-INF/gradle-plugins/
 /buildSrc/build/tmp/jar/
+/app/build/
+/buildSrc/build/source-roots/buildSrc/source-roots.txt

@@ -1,0 +1,2 @@
+configurations.maybeCreate("Siyer")
+artifacts.add("Siyer", file('BaiduLBS_Android_release.jar'))

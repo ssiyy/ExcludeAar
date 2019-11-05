@@ -1,0 +1,23 @@
+apply plugin: 'com.android.library'
+apply plugin: ExcludePlugin
+
+class ExcludePlugin implements Plugin<Project> {
+
+    @Override
+    void apply(Project target) {
+        target.afterEvaluate {
+            createMakJarTask(target)
+        }
+    }
+
+    private static void createMakJarTask(Project target) {
+        target.task(type: Copy, "makeJar") {
+            group "Siy"
+            description "生成一个jar"
+            from "${target.buildDir.absolutePath}\\intermediates\\packaged-classes\\release"
+            into "${target.buildDir.absolutePath}\\outputs\\libs"
+            include "classes.jar"
+            rename "classes.jar", "BaiduLBS_Android_release.jar"
+        }.dependsOn target.build
+    }
+}

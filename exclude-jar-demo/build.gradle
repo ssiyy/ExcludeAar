@@ -1,0 +1,51 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+android {
+    compileSdkVersion 29
+
+    defaultConfig {
+        applicationId "coder.siy.test"
+        minSdkVersion 14
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+
+    signingConfigs {
+        keyTest {
+            keyAlias gradle.keyAlias
+            keyPassword gradle.keyPassword
+            storeFile file('exaar.jks')
+            storePassword gradle.storePassword
+            v2SigningEnabled false
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt')
+            resValue "string", "baiduKey", gradle.baidukey
+            signingConfig signingConfigs.keyTest
+        }
+        debug {
+            minifyEnabled false
+            resValue "string", "baiduKey", gradle.baidukey
+            signingConfig signingConfigs.keyTest
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    testImplementation 'junit:junit:4.12'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+    implementation project(path: ":libraries:library-exclude-jar", configuration: "Siyer")
+
+}
