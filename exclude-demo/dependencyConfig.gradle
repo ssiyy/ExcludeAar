@@ -26,8 +26,10 @@ enum TYPE {
 }
 
 ext {
-    projectName = "library"
+    //想要修改依赖模式就在这儿修改
     type = TYPE.AAR_EXCLUDE
+
+    projectName = "library"
 
     getLibSoSet = this.&getLibSoSet
     getLibAndroidManifestStr = this.&getLibAndroidManifestStr
