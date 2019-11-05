@@ -1,0 +1,115 @@
+//需要过滤的包名
+def excludePackages = ['com.baidu']
+//需要过滤的类(需要全类名)
+def excludeClasses = []
+
+//这么写也可以 configurations.maybeCreate("exclude")
+configurations {
+    exclude
+}
+
+task printMsg {
+    group "Siy"
+
+    doLast {
+        println getExcludePackageRegex(excludePackages)
+        println getExcludeClassRegex(excludeClasses)
+    }
+}
+
+
+/**
+ * 解压jar目录存放的目录
+ */
+def unZipJarFile = new File(buildDir, 'unzipjar')
+
+/**
+ * 过滤jar之后生成文件存放的目录
+ */
+def excludeJarFile = new File(buildDir, "excludeJar")
+
+/**
+ * 正则表达式：https://docs.microsoft.com/zh-cn/previous-versions/system-center/system-center-2012-R2/hh440535(v=sc.12)?redirectedfrom=MSDN
+ *
+ * 过滤jar之后文件的名称
+ */
+def excludeJarName = "exclude_${getDefaultJar().name.replaceFirst(~/\.[^.]+$/, '')}"
+
+/**
+ * 获取名称为default的Configuration，并且过滤.jar文件
+ *
+ * @return 返回过滤之后文件
+ */
+def getDefaultJar() {
+    Configuration c = configurations.getByName("default")
+    def files = c.artifacts.files.filter {
+        it.name ==~ /.*\.jar/
+    }
+
+    def file = null
+    if (!files.empty) {
+        file = files[0]
+    }
+    return file
+}
+
+/**
+ * 删除unZipJarFile和excludeJar两个目录
+ */
+task deleteDir(type: Delete) {
+    delete unZipJarFile, excludeJarFile
+}
+
+/**
+ * 解压getDefaultJar()返回的jar文件
+ */
+task unzipJar(type: Copy) {
+    def zipFile = getDefaultJar()
+    def outputDir = unZipJarFile
+    from zipTree(zipFile)
+    into outputDir
+}
+
+unzipJar.dependsOn deleteDir
+
+task excludeJar(type: Jar) {
+    group 'Siy'
+    description '生成一个过滤之后的jar包'
+
+    //需要打包的资源所在的路径集和
+    from unZipJarFile
+
+    //去除路径集下部分的资源
+    exclude getExcludePackageRegex(excludePackages)
+    exclude getExcludeClassRegex(excludeClasses)
+
+    //整理输出的 Jar 文件后缀名
+    extension = "jar"
+
+    //最终的 Jar 文件名......如果没设置，默认为 [baseName]-[appendix]-[version]-[classifier].[extension]
+    baseName = excludeJarName
+
+    //生成jar包的路径
+    destinationDir excludeJarFile
+}
+
+excludeJar.dependsOn unzipJar
+
+
+//这么写也可以 artifacts.add("exclude", excludeAar)
+artifacts {
+    exclude excludeJar
+}
+
+
+static def getExcludePackageRegex(def packages) {
+    packages?.collect {
+        it?.replace('.', '\\')?.plus("\\**")
+    }
+}
+
+static def getExcludeClassRegex(def classes) {
+    classes?.collect {
+        it?.replace('.', '\\')?.plus(".class")
+    }
+}

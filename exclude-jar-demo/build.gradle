@@ -46,6 +46,6 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    implementation project(path: ":libraries:library-exclude-jar", configuration: "Siyer")
 
+    implementation project(':library-exclude-jar')
 }
