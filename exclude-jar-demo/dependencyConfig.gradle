@@ -1,0 +1,188 @@
+import groovy.xml.XmlUtil
+
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
+
+
+/**
+ * 调用依赖库的5种形式
+ *
+ */
+enum TYPE {
+    /**
+     * 过滤类的jar包
+     */
+    JAR_EXCLUDE,
+    /**
+     * 过滤类的aar
+     */
+    AAR_EXCLUDE,
+
+    /**
+     * 工程依赖
+     */
+    PROJECT,
+}
+
+ext {
+    projectName = "library"
+    type = TYPE.JAR_EXCLUDE
+
+    getLibSoSet = this.&getLibSoSet
+    getLibAndroidManifestStr = this.&getLibAndroidManifestStr
+}
+
+afterEvaluate {
+    modelChoose()
+    createMergeManifest()
+}
+
+private void modelChoose() {
+    if (type == TYPE.AAR_EXCLUDE) {
+        dependencies {
+            implementation project(configuration: 'exclude', path: ':libraries:library-exclude-aar')
+        }
+    } else if (type == TYPE.PROJECT) {
+        dependencies {
+            implementation project(getProject(projectName).path)
+        }
+    }else if(type == TYPE.JAR_EXCLUDE){
+        dependencies {
+            implementation project(path: ':library-exclude-jar', configuration: 'exclude')
+        }
+    }
+}
+
+/**
+ * 获取Library Project通过name
+ * @param name
+ * @return
+ */
+private Project getProject(def name) {
+    for (Project pro : rootProject.allprojects) {
+        if (pro.plugins.hasPlugin("com.android.library") && pro.name == name) {
+            return pro
+        }
+    }
+    return null
+}
+
+/**
+ * 根据不同的产品风味创建合并Android清单文件的任务
+ * @param fName
+ */
+private void createMergeManifest() {
+    task "mergeManifest"() {
+        dependsOn "processReleaseManifest"
+        group "Siy"
+        description "合并${project.name}和${projectName}项目的AndroidManifest.xml文件"
+        //如果不是工程依赖，就不能进行合并清单文件操作
+        boolean mergeAndroidManifest = type == TYPE.PROJECT
+        doLast {
+            //合并AndroidManifest.xml的目录路径
+            String mergePath = "${project.projectDir.absoluteFile}\\src\\main\\merge"
+            //合并AndroidManifest.xml的详细路径
+            String mergeAndroidManifestPath = "${mergePath}\\AndroidManifest.xml"
+
+            if (!mergeAndroidManifest) {
+                File mergeAndroidManifestFile = new File(mergeAndroidManifestPath)
+
+                //合并失败删除原来的文件
+                if (mergeAndroidManifestFile.exists()) {
+                    def a = mergeAndroidManifestFile.delete()
+                }
+
+                System.err.println "合并失败,type不是TYPE.PROJECT"
+            }
+
+
+            File merge = new File(mergePath)
+            if (!merge.exists()) {
+                merge.mkdirs()
+            }
+
+            //\build\intermediates\merged_manifests\release
+            //复制合并后的AndroidManifest.xml文件copy到指定目录
+            Files.copy(Paths.get(project."processReleaseManifest".manifestOutputDirectory.asFile.get().path + "\\AndroidManifest.xml"),
+                    Paths.get(mergeAndroidManifestPath), StandardCopyOption.REPLACE_EXISTING)
+
+            processMergeAndroidManifest(mergeAndroidManifestPath)
+        }
+    }
+}
+
+
+/**
+ * 处理合并后的AndroidManifest.xml文件
+ * @param path 合并后AndroidManifest.xml文件
+ */
+private void processMergeAndroidManifest(String path) {
+    def targetFile = new File(path)
+
+    //如果文件不存在就不要继续了
+    if (!targetFile.exists()) {
+        return
+    }
+
+    def mainifest = new XmlParser().parse(path)
+    mainifest."uses-sdk".replaceNode {
+        "uses-sdk"(
+                "xmlns:tools='http://schemas.android.com/tools' tools:overrideLibrary": "android.support.compat," +
+                        "android.support.mediacompat," +
+                        "android.support.v4," +
+                        "android.support.coreui," +
+                        "android.support.v7.appcompat," +
+                        "android.support.coreutils," +
+                        "android.support.fragment," +
+                        "android.support.graphics.drawable," +
+                        "android.arch.lifecycle")
+    }
+
+    String packageName = mainifest.@package
+    mainifest.@package = packageName.substring(0, packageName.lastIndexOf('.'))
+
+    targetFile.withOutputStream { os ->
+        os << XmlUtil.serialize(mainifest)
+    }
+}
+
+/**
+ * 此方法对使用该文件的Project暴露
+ *
+ * 返回需要的AndroidManifest.xml的路径
+ * @return 默认返回当前工程默认的AndroidManifest.xml路径，type为TYPE.JAR返回当前工程和projectName合并后的AndroidManifest.xml路径
+ */
+String getLibAndroidManifestStr() {
+    String path = "src\\main\\AndroidManifest.xml"
+
+    //如果jar测试打开
+    if (type == TYPE.JAR_EXCLUDE) {
+        path = "src\\main\\merge\\AndroidManifest.xml"
+    }
+    return path
+}
+
+/**
+ * 此方法对使用该文件的Project暴露
+ *
+ * 返回配置文件需要的so文件所在的路径
+ * @return 默认返回当前工程默认的so路径，当dependencyConfig.type为TYPE.JAR返回当前工程和dependencyConfig.libModule的so路径
+ */
+Set<String> getLibSoSet() {
+    //默认返回空的集合
+    Set<String> list = []
+
+    //如果开启测试
+    if (type == TYPE.JAR_EXCLUDE) {
+        def tarPro = getProject(projectName)
+        if (tarPro != null) {
+            //添加目标库的main
+            def mainSoDirs = tarPro.android.sourceSets.main.jniLibs.srcDirs
+            if (mainSoDirs) {
+                list.addAll(mainSoDirs)
+            }
+        }
+    }
+    return list
+}

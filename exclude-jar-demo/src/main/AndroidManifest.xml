@@ -9,6 +9,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <!-- 注意这个地方需要替换成自己的key -->
+        <meta-data
+            android:name="com.baidu.lbsapi.API_KEY"
+            android:value="@string/baiduKey"/>
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

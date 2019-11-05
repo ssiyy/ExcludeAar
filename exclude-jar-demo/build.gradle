@@ -1,6 +1,12 @@
+if (findProject(':libraries:library')) {
+    evaluationDependsOn(":libraries:library")
+}
+
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply from: "${project.projectDir.absoluteFile}\\dependencyConfig.gradle"
+
 android {
     compileSdkVersion 29
 
@@ -38,6 +44,16 @@ android {
             signingConfig signingConfigs.keyTest
         }
     }
+
+    sourceSets {
+        main {
+            //这里是为了测试jar，具体实现看dependencyConfig.gradle
+            jniLibs.srcDirs += getLibSoSet()
+
+            //这里是为了测试jar，具体实现看dependencyConfig.gradle
+            manifest.srcFile getLibAndroidManifestStr()
+        }
+    }
 }
 
 dependencies {
@@ -45,7 +61,4 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
-
-    implementation project(':library-exclude-jar')
 }

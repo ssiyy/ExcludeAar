@@ -16,3 +16,6 @@
 /buildSrc/build/tmp/jar/
 /app/build/
 /buildSrc/build/source-roots/buildSrc/source-roots.txt
+/library-exclude-jar/build/
+/libraries/library-exclude-aar/build/
+/exclude-jar-demo/src/
