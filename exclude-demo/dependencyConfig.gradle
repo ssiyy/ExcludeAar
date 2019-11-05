@@ -27,7 +27,7 @@ enum TYPE {
 
 ext {
     projectName = "library"
-    type = TYPE.JAR_EXCLUDE
+    type = TYPE.AAR_EXCLUDE
 
     getLibSoSet = this.&getLibSoSet
     getLibAndroidManifestStr = this.&getLibAndroidManifestStr
@@ -47,7 +47,7 @@ private void modelChoose() {
         dependencies {
             implementation project(getProject(projectName).path)
         }
-    }else if(type == TYPE.JAR_EXCLUDE){
+    } else if (type == TYPE.JAR_EXCLUDE) {
         dependencies {
             implementation project(path: ':library-exclude-jar', configuration: 'exclude')
         }
@@ -77,29 +77,32 @@ private void createMergeManifest() {
         dependsOn "processReleaseManifest"
         group "Siy"
         description "合并${project.name}和${projectName}项目的AndroidManifest.xml文件"
+
+        //合并AndroidManifest.xml的目录路径
+        String mergePath = "${project.projectDir.absoluteFile}\\src\\main\\merge"
+        //合并AndroidManifest.xml的详细路径
+        String mergeAndroidManifestPath = "${mergePath}\\AndroidManifest.xml"
+
         //如果不是工程依赖，就不能进行合并清单文件操作
         boolean mergeAndroidManifest = type == TYPE.PROJECT
+
+        if (!mergeAndroidManifest) {
+            System.err.println "合并失败,type不是TYPE.PROJECT"
+        }
+
         doLast {
-            //合并AndroidManifest.xml的目录路径
-            String mergePath = "${project.projectDir.absoluteFile}\\src\\main\\merge"
-            //合并AndroidManifest.xml的详细路径
-            String mergeAndroidManifestPath = "${mergePath}\\AndroidManifest.xml"
-
+            File mergedDir = new File(mergePath)
             if (!mergeAndroidManifest) {
-                File mergeAndroidManifestFile = new File(mergeAndroidManifestPath)
-
                 //合并失败删除原来的文件
-                if (mergeAndroidManifestFile.exists()) {
-                    def a = mergeAndroidManifestFile.delete()
+                if (mergedDir.exists()) {
+                    mergedDir.delete()
                 }
-
-                System.err.println "合并失败,type不是TYPE.PROJECT"
             }
 
-
-            File merge = new File(mergePath)
-            if (!merge.exists()) {
-                merge.mkdirs()
+            //加一个断言中断执行
+            assert mergeAndroidManifest
+            if (!mergedDir.exists()) {
+                mergedDir.mkdirs()
             }
 
             //\build\intermediates\merged_manifests\release
