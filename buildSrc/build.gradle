@@ -23,6 +23,6 @@ dependencies {
     implementation gradleApi()
     //java类自定生成的jar
     implementation 'com.sun.codemodel:codemodel:2.6'
-    implementation "com.android.tools.build:gradle:3.1.4"
+    implementation "com.android.tools.build:gradle:3.5.1"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
