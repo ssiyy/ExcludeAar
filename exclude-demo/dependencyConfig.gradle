@@ -6,7 +6,7 @@ import java.nio.file.StandardCopyOption
 
 
 /**
- * 调用依赖库的5种形式
+ * 调用依赖库的3种形式
  *
  */
 enum TYPE {
@@ -27,7 +27,7 @@ enum TYPE {
 
 ext {
     //想要修改依赖模式就在这儿修改
-    type = TYPE.JAR_EXCLUDE
+    type = TYPE.AAR_EXCLUDE
 
     projectName = "library"
 

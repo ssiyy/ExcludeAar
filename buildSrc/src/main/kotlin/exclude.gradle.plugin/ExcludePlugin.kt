@@ -1,11 +1,22 @@
 package exclude.gradle.plugin
 
 import groovy.util.XmlSlurper
-import org.codehaus.groovy.runtime.InvokerHelper
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.bundling.Jar
+import java.io.File
+
+
+open class ExcludeAArJar {
+
+    var inputPath: String? = null
+
+
+    var outputPath: String? = null
+
+
+    var exclude: Array<String>? = null
+}
 
 
 /**
@@ -25,32 +36,66 @@ import org.gradle.api.tasks.bundling.Jar
  */
 class ExcludePlugin : Plugin<Project> {
 
+
     private lateinit var project: Project
+
+    private val excludeAArJarExt by lazy {
+        project.extensions.create("excludeAArJar", ExcludeAArJar::class.java)
+    }
+
+    /**
+     * 存放输出介质
+     */
+    private val outputFile by lazy {
+        File(excludeAArJarExt.outputPath)
+    }
+
+    /**
+     * 解压aar包得到文件存放的目录
+     */
+    private val unZipAarFile by lazy {
+        File(outputFile,"unzipaar")
+    }
+
+
+    /**
+     * 解压jar包得到文件存放的目录
+     */
+    private val unZipJarFile by lazy {
+        File(outputFile,"unzipjar")
+    }
+
 
     override fun apply(project: Project) {
         this.project = project
 
         project.afterEvaluate {
-
-            createMakJarTask()
-            /*it.android.libraryVariants.groupBy { libraryVariant ->
-                libraryVariant.flavorName
-            }.forEach { (flavorName, _) ->
-                createMakJarTask(flavorName)
-            }*/
+            createSomeTasks(excludeAArJarExt)
         }
+    }
+
+
+
+
+
+
+    private fun createSomeTasks(fd: ExcludeAArJar) {
+        project.task<Copy>("unZipAar"){
+
+        }
+
     }
 
     private fun createMakJarTask() {
 
-        project.task<Copy>("makeJar") {
-            group = "Siy"
-            description = "生成一个jar"
-            from("${project.buildDir.absolutePath}\\intermediates\\packaged-classes\\release")
-            into("${project.buildDir.absolutePath}\\outputs\\libs")
-            include("classes.jar")
-            rename("classes.jar", "BaiduLBS_Android_release.jar")
-        }.dependsOn(project.tasks.getByName("build"))
+        /* project.task<Copy>("makeJar") {
+             group = "Siy"
+             description = "生成一个jar"
+             from("${project.buildDir.absolutePath}\\intermediates\\packaged-classes\\release")
+             into("${project.buildDir.absolutePath}\\outputs\\libs")
+             include("classes.jar")
+             rename("classes.jar", "BaiduLBS_Android_release.jar")
+         }.dependsOn(project.tasks.getByName("build"))*/
 
 
         /*   val firstLetterUpper = getFirstLetterUpper(flavorName)
