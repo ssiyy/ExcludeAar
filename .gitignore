@@ -19,3 +19,4 @@
 /library-exclude-jar/build/
 /libraries/library-exclude-aar/build/
 /exclude-jar-demo/src/
+/exclude-demo/src/main/merge/AndroidManifest.xml

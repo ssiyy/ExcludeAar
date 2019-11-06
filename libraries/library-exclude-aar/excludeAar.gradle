@@ -17,12 +17,33 @@ task printMsg {
     }
 }
 
-
+/**
+ * 解压aar包得到文件存放的目录
+ */
 def unZipAarFile = new File(buildDir, "unzipaar")
+
+/**
+ * 解压aar中jar包得到文件存放的目录
+ */
 def unZipJarFile = new File(buildDir, 'unzipjar')
+
+/**
+ * 存放过滤后生成的aar包的目录
+ */
 def excludeAarFile = new File(buildDir, "excludeaar")
+
+/**
+ * 过滤后aar包的名称
+ */
 def excludeAarName = "exclude_${getDefaultAar().name.replaceFirst(~/\.[^.]+$/, '')}"
 
+
+/**
+ *
+ * 获取名称为default的Configuration，并且过滤.aar文件
+ *
+ * @return
+ */
 def getDefaultAar() {
     Configuration c = configurations.getByName("default")
     def files = c.artifacts.files.filter {
@@ -36,10 +57,17 @@ def getDefaultAar() {
     return file
 }
 
+/**
+ * 删除unZipAarFile, unZipJarFile, excludeAarFile
+ */
 task deleteDir(type: Delete) {
     delete unZipAarFile, unZipJarFile, excludeAarFile
 }
 
+
+/**
+ * 解压getDefaultAar()返回的aar包
+ */
 task unZipAar(type: Copy) {
     def zipFile = getDefaultAar()
     def outputDir = unZipAarFile
@@ -48,6 +76,10 @@ task unZipAar(type: Copy) {
 }
 unZipAar.dependsOn deleteDir
 
+
+/**
+ * 解压aar包中包含的jar包
+ */
 task unzipJar(type: Copy) {
     def zipFile = new File(unZipAarFile, 'classes.jar')
     def outputDir = unZipJarFile
@@ -57,6 +89,10 @@ task unzipJar(type: Copy) {
 
 unzipJar.dependsOn unZipAar
 
+
+/**
+ * 用Jar任务过滤并生成新的jar包
+ */
 task zipJar(type: Jar) {
     baseName = 'classes'
     from unZipJarFile
@@ -67,6 +103,9 @@ task zipJar(type: Jar) {
 
 zipJar.dependsOn unzipJar
 
+/**
+ * 重新把文件压缩成新的aar包
+ */
 task excludeAar(type: Zip) {
     group 'Siy'
     description '生成一个过滤之后的aar包'

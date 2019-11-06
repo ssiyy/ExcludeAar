@@ -38,7 +38,7 @@ def excludeJarName = "exclude_${getDefaultJar().name.replaceFirst(~/\.[^.]+$/, '
 /**
  * 获取名称为default的Configuration，并且过滤.jar文件
  *
- * @return 返回过滤之后文件
+ * @return 返回jar文件
  */
 def getDefaultJar() {
     Configuration c = configurations.getByName("default")
@@ -72,6 +72,9 @@ task unzipJar(type: Copy) {
 
 unzipJar.dependsOn deleteDir
 
+/**
+ * 用Jar任务过滤并生成新的jar包
+ */
 task excludeJar(type: Jar) {
     group 'Siy'
     description '生成一个过滤之后的jar包'
