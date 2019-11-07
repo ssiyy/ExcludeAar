@@ -12,13 +12,15 @@ import java.nio.file.StandardCopyOption
 enum TYPE {
     /**
      * 过滤类的jar包
+     * 注意当进行jar依赖的时候需要运行一下mergeManifest任务把:exclude-demo和:libraries:library的AndroidManifest.xml
+     * 合并一下
+     *
      */
     JAR_EXCLUDE,
     /**
      * 过滤类的aar
      */
     AAR_EXCLUDE,
-
     /**
      * 工程依赖
      */
@@ -76,39 +78,41 @@ private Project getProject(def name) {
  */
 private void createMergeManifest() {
     task "mergeManifest"() {
-        dependsOn "processReleaseManifest"
         group "Siy"
-        description "合并${project.name}和${projectName}项目的AndroidManifest.xml文件"
 
-        //合并AndroidManifest.xml的目录路径
-        String mergePath = "${project.projectDir.absoluteFile}\\src\\main\\merge"
-        //合并AndroidManifest.xml的详细路径
-        String mergeAndroidManifestPath = "${mergePath}\\AndroidManifest.xml"
+        description "合并${project.name}和${projectName}项目的AndroidManifest.xml文件"
 
         //如果不是工程依赖，就不能进行合并清单文件操作
         boolean mergeAndroidManifest = type == TYPE.PROJECT
 
-        if (!mergeAndroidManifest) {
-            System.err.println "合并失败,type不是TYPE.PROJECT"
+        if (mergeAndroidManifest) {
+            dependsOn "processReleaseManifest"
         }
 
         doLast {
+            //合并AndroidManifest.xml的目录路径
+            String mergePath = "${project.projectDir.absoluteFile}\\src\\main\\merge"
+            //合并AndroidManifest.xml的详细路径
+            String mergeAndroidManifestPath = "${mergePath}\\AndroidManifest.xml"
+
             File mergedDir = new File(mergePath)
             if (!mergeAndroidManifest) {
                 //合并失败删除原来的文件
                 if (mergedDir.exists()) {
                     mergedDir.delete()
                 }
+                System.err.println "mergeManifest任务运行需要type是TYPE.PROJECT"
             }
 
             //加一个断言中断执行
             assert mergeAndroidManifest
+
             if (!mergedDir.exists()) {
                 mergedDir.mkdirs()
             }
 
             //\build\intermediates\merged_manifests\release
-            //复制合并后的AndroidManifest.xml文件copy到指定目录
+            //复制合并后的AndroidManifest.xml文件copy到指定目录,不同版本地址不一样，也有可能是（.manifestOutputDirectory.getAbsolutePath()）
             Files.copy(Paths.get(project."processReleaseManifest".manifestOutputDirectory.asFile.get().path + "\\AndroidManifest.xml"),
                     Paths.get(mergeAndroidManifestPath), StandardCopyOption.REPLACE_EXISTING)
 
@@ -164,7 +168,15 @@ String getLibAndroidManifestStr() {
     //如果jar测试打开
     if (type == TYPE.JAR_EXCLUDE) {
         path = "src\\main\\merge\\AndroidManifest.xml"
+
+        if (!(new File(project.projectDir,path).exists())) {
+            System.err.println "请先运行mergeManifest"
+
+            //加一个断言中断执行
+            assert false
+        }
     }
+
     return path
 }
 

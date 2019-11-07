@@ -1,48 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/white"
+    android:orientation="vertical"
     tools:context="coder.siy.test.MainActivity">
 
     <TextView
         android:id="@+id/latitudeTv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/black"
-        android:textSize="16sp"
+        android:layout_marginTop="10dp"
         android:gravity="center"
-        android:layout_marginTop="10dp"/>
+        android:textColor="@android:color/black"
+        android:textSize="16sp" />
 
     <TextView
         android:id="@+id/longitudeTv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/black"
-        android:textSize="16sp"
+        android:layout_marginTop="10dp"
         android:gravity="center"
-        android:layout_marginTop="10dp"/>
+        android:textColor="@android:color/black"
+        android:textSize="16sp" />
 
 
     <TextView
         android:id="@+id/locTypeTv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/black"
-        android:textSize="16sp"
+        android:layout_marginTop="10dp"
         android:gravity="center"
-        android:layout_marginTop="10dp"/>
+        android:textColor="@android:color/black"
+        android:textSize="16sp" />
 
     <TextView
         android:id="@+id/keyTv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/black"
-        android:textSize="16sp"
+        android:layout_marginTop="10dp"
         android:gravity="center"
         android:text="@string/baiduKey"
-        android:layout_marginTop="10dp"/>
+        android:textColor="@android:color/black"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/tipsTv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:lineSpacingMultiplier="1.5"
+        android:textColor="@android:color/black"
+        android:textSize="16sp" />
 </LinearLayout>
