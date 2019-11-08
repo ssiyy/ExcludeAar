@@ -81,11 +81,19 @@ unZipAar.dependsOn deleteDir
  * 解压aar包中包含的jar包
  */
 task unzipJar(type: Copy) {
-    def zipFile = new File(unZipAarFile, 'classes.jar')
-    def outputDir = unZipJarFile
-    from zipTree(zipFile)
-    into outputDir
+    Set<FileTree> jarFiles = new HashSet<>()
+    //筛选出jar包
+    unZipAarFile.traverse(type: groovy.io.FileType.FILES, nameFilter: ~/.*\.jar/) {file->
+        //解压一下
+        jarFiles.add(zipTree(file))
+        //删除原来的jar
+        file.delete()
+    }
+
+    from jarFiles
+    into unZipJarFile
 }
+
 
 unzipJar.dependsOn unZipAar
 
