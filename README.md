@@ -91,19 +91,27 @@ implementation project(path: ':xxx_aar', configuration: 'exclude')
 ## 过滤规则
 ```Groovy
 //需要过滤的包名
-def excludePackages = []
-//需要过滤的类(需要全类名)
-def excludeClasses = []
+String[] excludePackages = ['com.baidu']
+//需要过滤的类(需要全类名,不需要.class结尾)
+String[] excludeClasses = []
+//需要过滤的so
+String[] excludeSos = ['liblocSDK7b']
 
-static def getExcludePackageRegex(def packages) {
+static String[] getExcludePackageRegex(String[] packages) {
     packages?.collect {
         it?.replace('.', '\\')?.plus("\\**")
     }
 }
 
-static def getExcludeClassRegex(def classes) {
+static String[] getExcludeClassRegex(String[] classes) {
     classes?.collect {
         it?.replace('.', '\\')?.plus(".class")
+    }
+}
+
+static String[] getExcludeSoRegex(String[] sos) {
+    sos?.collect {
+        "**\\${it}.so"
     }
 }
 ```

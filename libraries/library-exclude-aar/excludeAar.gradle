@@ -165,7 +165,6 @@ static String[] getExcludeClassRegex(String[] classes) {
     }
 }
 
-
 static String[] getExcludeSoRegex(String[] sos) {
     sos?.collect {
         "**\\${it}.so"
