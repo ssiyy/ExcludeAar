@@ -1,8 +1,14 @@
 package exclude.gradle.plugin
 
 import com.android.build.gradle.LibraryExtension
+import org.gradle.api.Action
+import org.gradle.api.Incubating
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.artifacts.*
+import org.gradle.api.artifacts.dsl.ArtifactHandler
+import org.gradle.api.artifacts.dsl.DependencyConstraintHandler
+import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.plugins.ExtensionAware
 import kotlin.reflect.KClass
 
@@ -27,3 +33,23 @@ inline fun <reified type : Task> Project.task(name: String, noinline configurati
 
 fun <T : Task> Project.task(name: String, type: KClass<T>, configuration: T.() -> Unit) =
         tasks.create(name, type.java, configuration)
+
+
+/**
+ * Adds a dependency to the 'implementation' configuration.
+ *
+ * @param dependencyNotation notation for the dependency to be added.
+ * @return The dependency.
+ *
+ * @see [DependencyHandler.add]
+ */
+fun DependencyHandler.`implementation`(dependencyNotation: Any): Dependency? =
+        add("implementation", dependencyNotation)
+
+/**
+ * Kotlin extension function for [org.gradle.api.artifacts.dsl.DependencyHandler.project].
+ *
+ * @see org.gradle.api.artifacts.dsl.DependencyHandler.project
+ */
+inline fun DependencyHandler.`project`(vararg `notation`: Pair<String, Any?>): Dependency =
+        `project`(mapOf(*`notation`))

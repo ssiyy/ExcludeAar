@@ -101,17 +101,17 @@ class AarExculdeParam(name: String) : JarExculdeParam(name) {
  *      aars{
  *          testArr {
  *            path "build/libs/baiduLBS"
- *            excludePackages = 'com.baidu'
- *            excludeClasses = 'com.baidu.LocBaidu
- *            excludeSos = 'liblocSDK7b'
+ *            excludePackages  'com.baidu'
+ *            excludeClasses  'com.baidu.LocBaidu
+ *            excludeSos  'liblocSDK7b'
  *          }
  *        }
  *
  *      jars{
  *          testJar{
  *            path "build/libs/baiduLBS"
- *            excludePackages = 'com.baidu'
- *            excludeClasses = 'com.baidu.LocBaidu
+ *            excludePackages 'com.baidu'
+ *            excludeClasses 'com.baidu.LocBaidu
  *          }
  *       }
  *    }
@@ -123,24 +123,24 @@ class AarExculdeParam(name: String) : JarExculdeParam(name) {
  *
  *      aars{
  *          create("testArr") {
- *              path "build/libs/baiduLBS"
- *              excludePackages = 'com.baidu'
- *              excludeClasses = 'com.baidu.LocBaidu
- *              excludeSos = 'liblocSDK7b'
+ *              path(build/libs/baiduLBS")
+ *              excludePackages('com.baidu')
+ *              excludeClasses('com.baidu.LocBaidu)
+ *              excludeSos('liblocSDK7b')
  *          }
  *      }
  *
  *     jars{
  *             create("testJar") {
- *              path "build/libs/baiduLBS"
- *              excludePackages = 'com.baidu'
- *              excludeClasses = 'com.baidu.LocBaidu
+ *              path(build/libs/baiduLBS")
+ *              excludePackages('com.baidu')
+ *              excludeClasses('com.baidu.LocBaidu)
  *          }
  *     }
  * }
  *
  */
-open class ExcludeParamExtension(project: Project) {
+open class ExcludeParamExtension @JvmOverloads constructor(project: Project, var autoDependencies: Boolean = true) {
     val aars = project.container(AarExculdeParam::class.java)
     val jars = project.container(JarExculdeParam::class.java)
 
@@ -173,37 +173,40 @@ open class ExcludeParamExtension(project: Project) {
  */
 class ExcludePlugin : Plugin<Project> {
 
-    companion object {
-        private const val CONFIGURATIONSNAME = "excludeplugin"
-    }
-
     private lateinit var project: Project
 
     private lateinit var extParam: ExcludeParamExtension
 
     /**
+     * 过滤的根目录
+     */
+    private val excludePlguinRootDir by lazy {
+        File(project.buildDir,"excludePlguin")
+    }
+
+    /**
      * 解压aar文件存放的目录
      */
     private val unZipAarFile by lazy {
-        File(project.buildDir, "unzipaar")
+        File(excludePlguinRootDir, "unzipaar")
     }
 
     private val unZipJarFile by lazy {
-        File(project.buildDir, "unzipjar")
+        File(excludePlguinRootDir, "unzipjar")
     }
 
     /**
      * 过滤之后生成的aar包的路径
      */
     private val excludeAarFile by lazy {
-        File(project.buildDir, "excludeaar")
+        File(excludePlguinRootDir, "excludeaar")
     }
 
     /**
      * 过滤之后生成jar包的路径
      */
     private val excludeJarFile by lazy {
-        File(project.buildDir, "excludeJar")
+        File(excludePlguinRootDir, "excludeJar")
     }
 
     override fun apply(project: Project) {
@@ -211,16 +214,16 @@ class ExcludePlugin : Plugin<Project> {
         extParam = project.extensions.create("excludePluginExt", ExcludeParamExtension::class.java, project)
 
         project.afterEvaluate {
-            createExclueAarTask(extParam.aars)
-            createExcludeJarTask(extParam.jars)
+            createExclueAarTask(extParam)
+            createExcludeJarTask(extParam)
         }
     }
 
-    private fun createExclueAarTask(aars: NamedDomainObjectContainer<AarExculdeParam>) {
-        project.configurations.maybeCreate(CONFIGURATIONSNAME)
+    private fun createExclueAarTask(extension: ExcludeParamExtension) {
+
         // each(Closure action)、all(Closure action)，但是一般我们都会用 all(...) 来进行容器的迭代。
         // all(...) 迭代方法的特别之处是，不管是容器内已存在的元素，还是后续任何时刻加进去的元素，都会进行遍历。
-        aars.all {
+        extension.aars.all {
             val unZipAarTask = createdUnZipAarTask(it)
             val unZipJarTask = createUnZipJarTask(it)
             val deleteJarTask = createDeleteJars(it)
@@ -232,18 +235,32 @@ class ExcludePlugin : Plugin<Project> {
             zipJarTask.dependsOn(deleteJarTask)
             zipAarTask.dependsOn(zipJarTask)
 
-            project.artifacts.add(CONFIGURATIONSNAME, zipAarTask)
+            project.configurations.maybeCreate(it.name)
+            project.artifacts.add(it.name, zipAarTask)
+
+            if (extension.autoDependencies) {
+                project.dependencies.run {
+                    implementation(project("path" to project.path, "configuration" to it.name))
+                }
+            }
         }
     }
 
-    private fun createExcludeJarTask(jars: NamedDomainObjectContainer<JarExculdeParam>) {
-        project.configurations.maybeCreate(CONFIGURATIONSNAME)
-        jars.all {
+    private fun createExcludeJarTask(extension: ExcludeParamExtension) {
+        extension.jars.all {
             val unZipJarTask = createUnZipJarTask(it)
             val zipJarTask = createZipJar(it)
 
             zipJarTask.dependsOn(unZipJarTask)
-            project.artifacts.add(CONFIGURATIONSNAME, zipJarTask)
+
+            project.configurations.maybeCreate(it.name)
+            project.artifacts.add(it.name, zipJarTask)
+
+            if (extension.autoDependencies) {
+                project.dependencies.run {
+                    implementation(project("path" to project.path, "configuration" to it.name))
+                }
+            }
         }
     }
 
@@ -341,7 +358,7 @@ class ExcludePlugin : Plugin<Project> {
      *
      */
     private fun createZipAar(extParam: AarExculdeParam) =
-            project.task<Zip>("zipAar_${extParam.name?.trim()}") {
+            project.task<Zip>("exclude_${extParam.name?.trim()}") {
                 group = "excludePlugin"
                 description = "${extParam.name} exclude ${extParam.excludePackages},${extParam.excludeClasses},${extParam.excludeSoRegex}"
 
