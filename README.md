@@ -1,4 +1,4 @@
-# 一个用于过滤AAR(Jar)包中冗余或者冲突类的gradle脚本
+# 用于过滤aar中冲突类(class)和so库的脚本,也可以用来过滤jar中冲突class
 
 ## Demo截图
 ![demo](./img/demo.png)
