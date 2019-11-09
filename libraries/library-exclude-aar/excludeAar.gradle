@@ -76,8 +76,6 @@ task deleteDir(type: Delete) {
         sets.add(excludeAarFile)
     }
 
-
-    println "sets:" + sets
     delete sets
 }
 

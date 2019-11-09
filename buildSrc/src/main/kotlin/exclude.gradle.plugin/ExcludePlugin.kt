@@ -1,25 +1,162 @@
 package exclude.gradle.plugin
 
-import groovy.util.XmlSlurper
+import org.gradle.api.Action
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.tasks.AbstractCopyTask
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.Delete
+import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.tasks.bundling.Zip
 import java.io.File
 
+/**
+ * 过滤Jar包需要的参数
+ */
+open class JarExculdeParam
+/**
+ * 构造函数必须有一个name:String
+ */
+(name: String) {
+    /**
+     * 文件名称
+     */
+    var name: String? = name
 
-open class ExcludeAArJar {
+    /**
+     * 文件路径
+     */
+    var path: String? = null
 
-    var inputPath: String? = null
+    /**
+     * 需要过滤的包名:['com.baidu']
+     */
+    var excludePackages: Array<String> = arrayOf()
+    val excludePackageRegex
+        get() = excludePackages.map {
+            it.replace('.', '\\').plus("\\**")
+        }
 
+    /**
+     * 需要过滤的类(需要全类名,不需要.class结尾)
+     */
+    var excludeClasses: Array<String> = arrayOf()
+    val excludeClassRegex
+        get() = excludeClasses.map {
+            it.replace('.', '\\').plus(".class")
+        }
 
-    var outputPath: String? = null
+    /**
+     * 给路径赋值
+     */
+    fun path(path: String) {
+        this.path = path
+    }
 
+    /**
+     * 过滤的包名
+     */
+    fun excludePackages(vararg packages: String) {
+        this.excludePackages = packages as Array<String>
+    }
 
-    var exclude: Array<String>? = null
+    /**
+     * 过滤的类名
+     */
+    fun excludeClasses(vararg classes: String) {
+        this.excludeClasses = classes as Array<String>
+    }
+
+    override fun toString(): String {
+        return "name = $name, path = $path, excludePackages=$excludePackages, excludeClasses=$excludeClasses"
+    }
+}
+
+/**
+ * 过滤aar包需要的参数
+ */
+class AarExculdeParam(name: String) : JarExculdeParam(name) {
+    /**
+     * 过滤的so文件
+     */
+    var excludeSos: Array<String> = arrayOf()
+    val excludeSoRegex
+        get() = excludeSos.map {
+            "**\\${it}.so"
+        }
+
+    fun excludeSos(vararg sos: String) {
+        this.excludeSos = sos as Array<String>
+    }
 }
 
 
 /**
+ *
+ *groovy:
+ *
+ *  excludePluginExt{
+ *
+ *      aars{
+ *          testArr {
+ *            path "build/libs/baiduLBS"
+ *            excludePackages = 'com.baidu'
+ *            excludeClasses = 'com.baidu.LocBaidu
+ *            excludeSos = 'liblocSDK7b'
+ *          }
+ *        }
+ *
+ *      jars{
+ *          testJar{
+ *            path "build/libs/baiduLBS"
+ *            excludePackages = 'com.baidu'
+ *            excludeClasses = 'com.baidu.LocBaidu
+ *          }
+ *       }
+ *    }
+ *
+ *
+ * kotlin:
+ *
+ * configure<ExcludeParamExtension> {
+ *
+ *      aars{
+ *          create("testArr") {
+ *              path "build/libs/baiduLBS"
+ *              excludePackages = 'com.baidu'
+ *              excludeClasses = 'com.baidu.LocBaidu
+ *              excludeSos = 'liblocSDK7b'
+ *          }
+ *      }
+ *
+ *     jars{
+ *             create("testJar") {
+ *              path "build/libs/baiduLBS"
+ *              excludePackages = 'com.baidu'
+ *              excludeClasses = 'com.baidu.LocBaidu
+ *          }
+ *     }
+ * }
+ *
+ */
+open class ExcludeParamExtension(project: Project) {
+    val aars = project.container(AarExculdeParam::class.java)
+    val jars = project.container(JarExculdeParam::class.java)
+
+    fun aars(action: Action<NamedDomainObjectContainer<AarExculdeParam>>) {
+        action.execute(aars)
+    }
+
+    fun jars(action: Action<NamedDomainObjectContainer<JarExculdeParam>>) {
+        action.execute(jars)
+    }
+}
+
+
+/**
+ *
+ * https://blog.csdn.net/XSF50717/article/details/89857669
  *
  * https://blog.csdn.net/universsky2015/article/details/83593307
  *
@@ -36,120 +173,194 @@ open class ExcludeAArJar {
  */
 class ExcludePlugin : Plugin<Project> {
 
+    companion object {
+        private const val CONFIGURATIONSNAME = "excludeplugin"
+    }
 
     private lateinit var project: Project
 
-    private val excludeAArJarExt by lazy {
-        project.extensions.create("excludeAArJar", ExcludeAArJar::class.java)
-    }
+    private lateinit var extParam: ExcludeParamExtension
 
     /**
-     * 存放输出介质
-     */
-    private val outputFile by lazy {
-        File(excludeAArJarExt.outputPath)
-    }
-
-    /**
-     * 解压aar包得到文件存放的目录
+     * 解压aar文件存放的目录
      */
     private val unZipAarFile by lazy {
-        File(outputFile,"unzipaar")
+        File(project.buildDir, "unzipaar")
     }
 
+    private val unZipJarFile by lazy {
+        File(project.buildDir, "unzipjar")
+    }
 
     /**
-     * 解压jar包得到文件存放的目录
+     * 过滤之后生成的aar包的路径
      */
-    private val unZipJarFile by lazy {
-        File(outputFile,"unzipjar")
+    private val excludeAarFile by lazy {
+        File(project.buildDir, "excludeaar")
     }
 
+    /**
+     * 过滤之后生成jar包的路径
+     */
+    private val excludeJarFile by lazy {
+        File(project.buildDir, "excludeJar")
+    }
 
     override fun apply(project: Project) {
         this.project = project
+        extParam = project.extensions.create("excludePluginExt", ExcludeParamExtension::class.java, project)
 
         project.afterEvaluate {
-            createSomeTasks(excludeAArJarExt)
+            createExclueAarTask(extParam.aars)
+            createExcludeJarTask(extParam.jars)
         }
     }
 
+    private fun createExclueAarTask(aars: NamedDomainObjectContainer<AarExculdeParam>) {
+        project.configurations.maybeCreate(CONFIGURATIONSNAME)
+        // each(Closure action)、all(Closure action)，但是一般我们都会用 all(...) 来进行容器的迭代。
+        // all(...) 迭代方法的特别之处是，不管是容器内已存在的元素，还是后续任何时刻加进去的元素，都会进行遍历。
+        aars.all {
+            val unZipAarTask = createdUnZipAarTask(it)
+            val unZipJarTask = createUnZipJarTask(it)
+            val deleteJarTask = createDeleteJars(it)
+            val zipJarTask = createZipJar(it)
+            val zipAarTask = createZipAar(it)
 
+            unZipJarTask.dependsOn(unZipAarTask)
+            deleteJarTask.dependsOn(unZipJarTask)
+            zipJarTask.dependsOn(deleteJarTask)
+            zipAarTask.dependsOn(zipJarTask)
 
-
-
-
-    private fun createSomeTasks(fd: ExcludeAArJar) {
-        project.task<Copy>("unZipAar"){
-
+            project.artifacts.add(CONFIGURATIONSNAME, zipAarTask)
         }
-
     }
 
-    private fun createMakJarTask() {
+    private fun createExcludeJarTask(jars: NamedDomainObjectContainer<JarExculdeParam>) {
+        project.configurations.maybeCreate(CONFIGURATIONSNAME)
+        jars.all {
+            val unZipJarTask = createUnZipJarTask(it)
+            val zipJarTask = createZipJar(it)
 
-        /* project.task<Copy>("makeJar") {
-             group = "Siy"
-             description = "生成一个jar"
-             from("${project.buildDir.absolutePath}\\intermediates\\packaged-classes\\release")
-             into("${project.buildDir.absolutePath}\\outputs\\libs")
-             include("classes.jar")
-             rename("classes.jar", "BaiduLBS_Android_release.jar")
-         }.dependsOn(project.tasks.getByName("build"))*/
-
-
-        /*   val firstLetterUpper = getFirstLetterUpper(flavorName)
-
-         project.task<Jar>("make${firstLetterUpper}Jar") {
-             group = "Siy"
-             description = "生成一个${flavorName}"
-             //需要打包的资源所在的路径集和
-             from("${project.buildDir.absolutePath}\\intermediates\\javac\\release")
-
-             //去除路径集下部分的资源
-             exclude("${getPackagePath()}\\BuildConfig.class",
-                     "${getPackagePath()}\\BuildConfig\$*.class",
-                     "**\\R.class","**\\R\$*.class")
-             //只导入资源路径集下的部分资源
-             include("\\**\\*.class")
-
-             //整理输出的 Jar 文件后缀名
-             extension = "jar"
-
-             //最终的 Jar 文件名......如果没设置，默认为 [baseName]-[appendix]-[version]-[classifier].[extension]
-             archiveName ="${project.name}_${project.android.defaultConfig.versionName}.${extension}"
-         }.dependsOn(project.tasks.getByName("compile${firstLetterUpper}ReleaseJavaWithJavac"))*/
-
+            zipJarTask.dependsOn(unZipJarTask)
+            project.artifacts.add(CONFIGURATIONSNAME, zipJarTask)
+        }
     }
 
     /**
-     * 获取字符串的首字母大写
-     * @param str
-     * @return
+     * 创建解压aar包的任务
+     *
+     * @param extParam aar参数
      */
-    private fun getFirstLetterUpper(str: String?) = if (str.isNullOrEmpty()) {
-        ""
-    } else {
-        "${str[0].toUpperCase()}${str.substring(1)}"
-    }
+    private fun createdUnZipAarTask(extParam: AarExculdeParam) =
+            project.task<Copy>("unZipAar_${extParam.name?.trim()}") {
+                //解压aar后存放文件的目录
+                val unZipAarPath = File(unZipAarFile, extParam.name)
+                from(project.zipTree(File(extParam.path)))
+                into(unZipAarPath)
+
+                doLast {
+                    val jarFiles = mutableSetOf<File>()
+
+                    //如果解压的aar包存在就找到它下面的所有jar
+                    if (unZipAarPath.exists()) {
+                        unZipAarPath.walk().filter {
+                            it.extension == "jar"
+                        }.run {
+                            jarFiles.addAll(this)
+                        }
+                    }
+
+                    (project.tasks.getByName("unzipJar_${extParam.name?.trim()}") as? AbstractCopyTask)?.from(
+                            jarFiles.map {
+                                project.zipTree(it)
+                            })
+
+                    (project.tasks.getByName("deleteJars_${extParam.name?.trim()}") as? Delete)?.delete(jarFiles)
+                }
+            }
+
+    /**
+     * 创建解压jar包的任务
+     *
+     * @param extParam
+     */
+    private fun createUnZipJarTask(extParam: JarExculdeParam) =
+            project.task<Copy>("unzipJar_${extParam.name?.trim()}") {
+                from(project.zipTree(File(path)))
+                into(File(unZipJarFile, extParam.name))
+            }
 
 
     /**
-     * 获取工程的包名
+     * 创建删除jar的任务
      */
-    private fun getPackageName(): String {
-        val androidManifest = project.android.sourceSets.getByName("main").manifest.srcFile
-        val xmlSlurper = XmlSlurper().parse(androidManifest)
-        return xmlSlurper.getProperty("@package").toString()
-    }
+    private fun createDeleteJars(extParam: JarExculdeParam) =
+            project.task<Delete>("deleteJars_${extParam.name?.trim()}") {
+
+            }
 
 
     /**
-     * 获取工程包路径
+     * 创建压缩jar的任务
+     *
+     * @param extParam 过滤参数
+     *
+     * 如果 extParsm is AarExculdeParam 任务名为 zipJar_extParam.name
+     * 如果 extParam is JarExculdeParam 任务名为 excludeJar_extParam.name
+     *
      */
-    private fun getPackagePath(): String {
-        val packageName = getPackageName()
-        return packageName.replace(".", "\\")
-    }
+    private fun createZipJar(extParam: JarExculdeParam) =
+            project.task<Jar>(if (extParam !is AarExculdeParam) "excludeJar_${extParam.name?.trim()}" else "zipJar_${extParam.name?.trim()}") {
+                if (extParam !is AarExculdeParam) {
+                    group = "excludePlugin"
+                    description = "${extParam.name} exclude ${extParam.excludePackages} and ${extParam.excludeClasses}"
+                    baseName = getExcludeJarName(extParam)
+                    destinationDir = excludeJarFile
+                } else {
+                    //文件名
+                    baseName = "classes"
+                    destinationDir = File(unZipAarFile, extParam.name)
+                }
+
+                //需要打包的资源所在的路径集和
+                from(File(unZipJarFile, extParam.name))
+                //去除路径集下部分的资源
+                exclude(extParam.excludeClassRegex)
+                exclude(extParam.excludePackageRegex)
+                //整理输出的 Jar 文件后缀名
+                extension = "jar"
+            }
+
+
+    /**
+     * 创建压缩aar的任务
+     *
+     * @param extParam 过滤参数
+     *
+     *
+     */
+    private fun createZipAar(extParam: AarExculdeParam) =
+            project.task<Zip>("zipAar_${extParam.name?.trim()}") {
+                group = "excludePlugin"
+                description = "${extParam.name} exclude ${extParam.excludePackages},${extParam.excludeClasses},${extParam.excludeSoRegex}"
+
+                baseName = getExcludeAarName(extParam)
+                extension = "aar"
+                from(File(unZipAarFile, extParam.name))
+                exclude(extParam.excludeSoRegex)
+                destinationDir = excludeAarFile
+            }
+
+
+    /**
+     * 获取过滤之后的aar包名称
+     */
+    private fun getExcludeAarName(aar: AarExculdeParam) = "exclude_${aar.name}"
+
+    /**
+     * 获取过滤之后的jar包名称
+     */
+    private fun getExcludeJarName(jar: JarExculdeParam) = "exclude_${jar.name}"
 
 }
