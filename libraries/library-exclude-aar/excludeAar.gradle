@@ -89,6 +89,7 @@ task unZipAar(type: Copy) {
     from zipTree(getDefaultAar())
     into unZipAarFile
 
+    //完成aar解压之后，设置unzipJar的from和deleteJars的delete
     doLast {
         Set<File> jarFiles = new HashSet<>()
         if (unZipAarFile.exists()) {
