@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.method.ScrollingMovementMethod
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.library.BaiduLocationService
@@ -35,7 +36,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        tipsTv.text = tips
+        tipsTv.run{
+            movementMethod = ScrollingMovementMethod.getInstance();
+            text = tips
+        }
 
         locService = BaiduLocationService(this)
         locService.listener = { latitude/*获取纬度信息*/, longitude/*获取经度信息*/, _, locType/*错误码*/ ->

@@ -191,7 +191,7 @@ Set<String> getLibSoSet() {
     Set<String> list = []
 
     //如果开启测试
-    if (type == TYPE.JAR_EXCLUDE) {
+    if (type == TYPE.JAR_EXCLUDE || type == TYPE.AAR_EXCLUDE) {
         def tarPro = getProject(projectName)
         if (tarPro != null) {
             //添加目标库的main

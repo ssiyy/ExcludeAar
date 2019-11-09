@@ -1,7 +1,9 @@
 //需要过滤的包名
-def excludePackages = ['com.baidu']
-//需要过滤的类(需要全类名)
-def excludeClasses = []
+String[] excludePackages = ['com.baidu']
+//需要过滤的类(需要全类名,不需要.class结尾)
+String[] excludeClasses = []
+//需要过滤的so
+String[] excludeSos = ['liblocSDK7b']
 
 //这么写也可以 configurations.maybeCreate("exclude")
 configurations {
@@ -61,7 +63,22 @@ def getDefaultAar() {
  * 删除unZipAarFile, unZipJarFile, excludeAarFile
  */
 task deleteDir(type: Delete) {
-    delete unZipAarFile, unZipJarFile, excludeAarFile
+    Set<File> sets = new HashSet<>()
+    if (unZipAarFile.exists()) {
+        sets.add(unZipAarFile)
+    }
+
+    if (unZipJarFile.exists()) {
+        sets.add(unZipJarFile)
+    }
+
+    if (excludeAarFile) {
+        sets.add(excludeAarFile)
+    }
+
+
+    println "sets:" + sets
+    delete sets
 }
 
 
@@ -69,10 +86,24 @@ task deleteDir(type: Delete) {
  * 解压getDefaultAar()返回的aar包
  */
 task unZipAar(type: Copy) {
-    def zipFile = getDefaultAar()
-    def outputDir = unZipAarFile
-    from zipTree(zipFile)
-    into outputDir
+    from zipTree(getDefaultAar())
+    into unZipAarFile
+
+    doLast {
+        Set<File> jarFiles = new HashSet<>()
+        if (unZipAarFile.exists()) {
+            unZipAarFile.traverse(type: groovy.io.FileType.FILES, nameFilter: ~/.*\.jar/) { file ->
+                jarFiles.add(file)
+            }
+        }
+        unzipJar.from(
+                jarFiles.collect {
+                    zipTree(it)
+                }
+        )
+
+        deleteJars.delete(jarFiles)
+    }
 }
 unZipAar.dependsOn deleteDir
 
@@ -81,22 +112,15 @@ unZipAar.dependsOn deleteDir
  * 解压aar包中包含的jar包
  */
 task unzipJar(type: Copy) {
-    Set<FileTree> jarFiles = new HashSet<>()
-    //筛选出jar包
-    unZipAarFile.traverse(type: groovy.io.FileType.FILES, nameFilter: ~/.*\.jar/) {file->
-        //解压一下
-        jarFiles.add(zipTree(file))
-        //删除原来的jar
-        file.delete()
-    }
-
-    from jarFiles
     into unZipJarFile
 }
-
-
 unzipJar.dependsOn unZipAar
 
+/**
+ * 删除解压之后的jars
+ */
+task deleteJars(type: Delete)
+deleteJars.dependsOn unzipJar
 
 /**
  * 用Jar任务过滤并生成新的jar包
@@ -108,8 +132,7 @@ task zipJar(type: Jar) {
     exclude getExcludePackageRegex(excludePackages)
     exclude getExcludeClassRegex(excludeClasses)
 }
-
-zipJar.dependsOn unzipJar
+zipJar.dependsOn deleteJars
 
 /**
  * 重新把文件压缩成新的aar包
@@ -120,26 +143,31 @@ task excludeAar(type: Zip) {
     baseName excludeAarName
     extension "aar"
     from unZipAarFile
+    exclude getExcludeSoRegex(excludeSos)
     destinationDir excludeAarFile
 }
-
 excludeAar.dependsOn zipJar
-
 
 //这么写也可以 artifacts.add("exclude", excludeAar)
 artifacts {
     exclude excludeAar
 }
 
-
-static def getExcludePackageRegex(def packages) {
+static String[] getExcludePackageRegex(String[] packages) {
     packages?.collect {
         it?.replace('.', '\\')?.plus("\\**")
     }
 }
 
-static def getExcludeClassRegex(def classes) {
+static String[] getExcludeClassRegex(String[] classes) {
     classes?.collect {
         it?.replace('.', '\\')?.plus(".class")
+    }
+}
+
+
+static String[] getExcludeSoRegex(String[] sos) {
+    sos?.collect {
+        "**\\${it}.so"
     }
 }

@@ -57,7 +57,17 @@ def getDefaultJar() {
  * 删除unZipJarFile和excludeJar两个目录
  */
 task deleteDir(type: Delete) {
-    delete unZipJarFile, excludeJarFile
+    Set<File> sets = new HashSet<>()
+
+    if (unZipJarFile.exists()) {
+        sets.add(unZipJarFile)
+    }
+
+    if (excludeJarFile) {
+        sets.add(excludeJarFile)
+    }
+
+    delete sets
 }
 
 /**
@@ -69,7 +79,6 @@ task unzipJar(type: Copy) {
     from zipTree(zipFile)
     into outputDir
 }
-
 unzipJar.dependsOn deleteDir
 
 /**
@@ -95,7 +104,6 @@ task excludeJar(type: Jar) {
     //生成jar包的路径
     destinationDir excludeJarFile
 }
-
 excludeJar.dependsOn unzipJar
 
 
@@ -103,7 +111,6 @@ excludeJar.dependsOn unzipJar
 artifacts {
     exclude excludeJar
 }
-
 
 static def getExcludePackageRegex(def packages) {
     packages?.collect {
