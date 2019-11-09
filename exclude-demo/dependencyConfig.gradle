@@ -25,11 +25,15 @@ enum TYPE {
      * 工程依赖
      */
     PROJECT,
+    /**
+     *无依赖
+     */
+    NONE
 }
 
 ext {
     //想要修改依赖模式就在这儿修改
-    type = TYPE.AAR_EXCLUDE
+    type = TYPE.NONE
 
     projectName = "library"
 
@@ -169,7 +173,7 @@ String getLibAndroidManifestStr() {
     if (type == TYPE.JAR_EXCLUDE) {
         path = "src\\main\\merge\\AndroidManifest.xml"
 
-        if (!(new File(project.projectDir,path).exists())) {
+        if (!(new File(project.projectDir, path).exists())) {
             System.err.println "请先运行mergeManifest"
 
             //加一个断言中断执行

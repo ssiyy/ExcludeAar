@@ -8,6 +8,15 @@ apply plugin: 'kotlin-android-extensions'
 apply from: "${project.projectDir.absoluteFile}\\dependencyConfig.gradle"
 apply plugin: 'exclude_plugin'
 
+excludePluginExt {
+    aars {
+        BaiduLBS_Android_debug {
+            path "/libs/BaiduLBS_Android_debug.aar"
+            excludePackages 'com.baidu'
+        }
+    }
+}
+
 android {
     compileSdkVersion 29
 

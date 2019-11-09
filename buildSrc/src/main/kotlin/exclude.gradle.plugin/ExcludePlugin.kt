@@ -181,7 +181,7 @@ class ExcludePlugin : Plugin<Project> {
      * 过滤的根目录
      */
     private val excludePlguinRootDir by lazy {
-        File(project.buildDir,"excludePlguin")
+        File(project.buildDir, "excludePlguin")
     }
 
     /**
@@ -214,16 +214,18 @@ class ExcludePlugin : Plugin<Project> {
         extParam = project.extensions.create("excludePluginExt", ExcludeParamExtension::class.java, project)
 
         project.afterEvaluate {
+            printlnExcludeMsg()
             createExclueAarTask(extParam)
             createExcludeJarTask(extParam)
         }
     }
 
     private fun createExclueAarTask(extension: ExcludeParamExtension) {
-
         // each(Closure action)、all(Closure action)，但是一般我们都会用 all(...) 来进行容器的迭代。
         // all(...) 迭代方法的特别之处是，不管是容器内已存在的元素，还是后续任何时刻加进去的元素，都会进行遍历。
         extension.aars.all {
+            judeExtParam(it)
+
             val unZipAarTask = createdUnZipAarTask(it)
             val unZipJarTask = createUnZipJarTask(it)
             val deleteJarTask = createDeleteJars(it)
@@ -248,10 +250,14 @@ class ExcludePlugin : Plugin<Project> {
 
     private fun createExcludeJarTask(extension: ExcludeParamExtension) {
         extension.jars.all {
+            judeExtParam(it)
+
             val unZipJarTask = createUnZipJarTask(it)
             val zipJarTask = createZipJar(it)
 
             zipJarTask.dependsOn(unZipJarTask)
+
+            (project.tasks.getByName("excludeJar_${it.name?.trim()}") as? AbstractCopyTask)?.from(project.zipTree(it.path))
 
             project.configurations.maybeCreate(it.name)
             project.artifacts.add(it.name, zipJarTask)
@@ -261,6 +267,17 @@ class ExcludePlugin : Plugin<Project> {
                     implementation(project("path" to project.path, "configuration" to it.name))
                 }
             }
+        }
+    }
+
+    /**
+     * 校验参数
+     *
+     * @param param
+     */
+    private fun judeExtParam(param: JarExculdeParam) {
+        if (!param.name.isNullOrEmpty()) {
+            require(!param.path.isNullOrEmpty()) { "path is necessary" }
         }
     }
 
@@ -300,11 +317,12 @@ class ExcludePlugin : Plugin<Project> {
     /**
      * 创建解压jar包的任务
      *
+     * 注意：from 参数 动态 设置
+     *
      * @param extParam
      */
     private fun createUnZipJarTask(extParam: JarExculdeParam) =
             project.task<Copy>("unzipJar_${extParam.name?.trim()}") {
-                from(project.zipTree(File(path)))
                 into(File(unZipJarFile, extParam.name))
             }
 
@@ -380,4 +398,47 @@ class ExcludePlugin : Plugin<Project> {
      */
     private fun getExcludeJarName(jar: JarExculdeParam) = "exclude_${jar.name}"
 
+    /**
+     * 打印信息
+     */
+    private fun printlnExcludeMsg() {
+        project.task("printlnExcludeMsg") {
+            it.group = "excludePlugin"
+            it.description = "println exclude message"
+
+            it.doLast {
+                println("----------------------------aar-----------------------")
+                extParam.aars.all { aar ->
+                    println("name:${aar.name}")
+                    println("path:${aar.path}\n")
+                    println("excludePackages:${aar.excludePackages.fold("") { acc, item ->
+                        "$acc\n$item"
+                    }
+                    }\n")
+                    println("excludeClasses:${aar.excludeClasses.fold("") { acc, item ->
+                        "$acc\n$item"
+                    }
+                    }\n")
+                    println("excludeSos:${aar.excludeSos.fold("") { acc, item ->
+                        "$acc\n$item"
+                    }
+                    }\n")
+                }
+
+                println("----------------------------jar-----------------------")
+                extParam.jars.all { jar ->
+                    println("name:${jar.name}")
+                    println("path:${jar.path}\n")
+                    println("excludePackages:${jar.excludePackages.fold("") { acc, item ->
+                        "$acc\n$item"
+                    }
+                    }\n")
+                    println("excludeClasses:${jar.excludeClasses.fold("") { acc, item ->
+                        "$acc\n$item"
+                    }
+                    }\n")
+                }
+            }
+        }
+    }
 }
