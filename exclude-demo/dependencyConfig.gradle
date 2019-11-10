@@ -67,14 +67,20 @@ private void modelChoose() {
             aars {
                 BaiduLBS_Android_debug {
                     path "/libs/exclude/BaiduLBS_Android_debug.aar"
-                    excludePackages 'com.baidu.android'
+                    excludePackages 'com.baidu.location'
                 }
             }
 
             jars{
                 BaiduLBS_Android_7_5_2{
                     path "/libs/exclude/BaiduLBS_Android_7.5.2.jar"
-                    excludePackages 'com.baidu.location','com.baidu.lbsapi'
+                    excludePackages 'com.baidu.android','com.baidu.lbsapi'
+                }
+
+                map_baidu{
+                    path "/libs/exclude/map-baidu.jar"
+                    excludePackages "io.dcloud.js.map.adapter"
+                    excludeClasses "io.dcloud.js.map.IFMapDispose","io.dcloud.js.map.JsMapCircle","io.dcloud.js.map.MapJsUtil"
                 }
             }
         }

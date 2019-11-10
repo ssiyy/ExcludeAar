@@ -238,12 +238,9 @@ class ExcludePlugin : Plugin<Project> {
             zipJarTask.dependsOn(deleteJarTask)
             zipAarTask.dependsOn(zipJarTask)
 
-            project.configurations.maybeCreate(it.name)
-            project.artifacts.add(it.name, zipAarTask)
-
             if (extension.autoDependencies) {
                 project.dependencies.run {
-                    implementation(project("path" to project.path, "configuration" to it.name))
+                    implementation(project.files(File(zipAarTask.destinationDir, zipAarTask.archiveName)))
                 }
             }
         }
@@ -261,12 +258,9 @@ class ExcludePlugin : Plugin<Project> {
 
             (project.tasks.getByName("unzipJar_${it.name?.trim()}") as? AbstractCopyTask)?.from(project.zipTree(it.path))
 
-            project.configurations.maybeCreate(it.name)
-            project.artifacts.add(it.name, zipJarTask)
-
             if (extension.autoDependencies) {
                 project.dependencies.run {
-                    implementation(project("path" to project.path, "configuration" to it.name))
+                    implementation(project.files(File(zipJarTask.destinationDir, zipJarTask.archiveName)))
                 }
             }
         }
