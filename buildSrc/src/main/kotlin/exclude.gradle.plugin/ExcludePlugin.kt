@@ -225,13 +225,14 @@ class ExcludePlugin : Plugin<Project> {
         // all(...) 迭代方法的特别之处是，不管是容器内已存在的元素，还是后续任何时刻加进去的元素，都会进行遍历。
         extension.aars.all {
             judeExtParam(it)
-
+            val deleteDirsTask = createDeleteDirs(it)
             val unZipAarTask = createdUnZipAarTask(it)
             val unZipJarTask = createUnZipJarTask(it)
             val deleteJarTask = createDeleteJars(it)
             val zipJarTask = createZipJar(it)
             val zipAarTask = createZipAar(it)
 
+            unZipAarTask.dependsOn(deleteDirsTask)
             unZipJarTask.dependsOn(unZipAarTask)
             deleteJarTask.dependsOn(unZipJarTask)
             zipJarTask.dependsOn(deleteJarTask)
@@ -251,13 +252,14 @@ class ExcludePlugin : Plugin<Project> {
     private fun createExcludeJarTask(extension: ExcludeParamExtension) {
         extension.jars.all {
             judeExtParam(it)
-
+            val deleteDirsTask = createDeleteDirs(it)
             val unZipJarTask = createUnZipJarTask(it)
             val zipJarTask = createZipJar(it)
 
+            unZipJarTask.dependsOn(deleteDirsTask)
             zipJarTask.dependsOn(unZipJarTask)
 
-            (project.tasks.getByName("excludeJar_${it.name?.trim()}") as? AbstractCopyTask)?.from(project.zipTree(it.path))
+            (project.tasks.getByName("unzipJar_${it.name?.trim()}") as? AbstractCopyTask)?.from(project.zipTree(it.path))
 
             project.configurations.maybeCreate(it.name)
             project.artifacts.add(it.name, zipJarTask)
@@ -328,11 +330,23 @@ class ExcludePlugin : Plugin<Project> {
 
 
     /**
-     * 创建删除jar的任务
+     * 创建删除Jar的任务
      */
     private fun createDeleteJars(extParam: JarExculdeParam) =
             project.task<Delete>("deleteJars_${extParam.name?.trim()}") {
 
+            }
+
+    /**
+     * 创建删除目录的任务
+     */
+    private fun createDeleteDirs(extParam: JarExculdeParam) =
+            project.task<Delete>("deleteDirs_${extParam.name?.trim()}") {
+                if (extParam is AarExculdeParam) {
+                    delete(File(unZipAarFile, extParam.name), File(unZipJarFile, extParam.name), File(excludeAarFile, "${getExcludeAarName(extParam)}.aar"))
+                } else {
+                    delete(File(unZipJarFile, extParam.name), File(excludeJarFile, "${getExcludeJarName(extParam)}.jar"))
+                }
             }
 
 
@@ -376,7 +390,7 @@ class ExcludePlugin : Plugin<Project> {
      *
      */
     private fun createZipAar(extParam: AarExculdeParam) =
-            project.task<Zip>("exclude_${extParam.name?.trim()}") {
+            project.task<Zip>("excludeAar_${extParam.name?.trim()}") {
                 group = "excludePlugin"
                 description = "${extParam.name} exclude ${extParam.excludePackages},${extParam.excludeClasses},${extParam.excludeSoRegex}"
 

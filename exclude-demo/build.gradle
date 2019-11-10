@@ -6,16 +6,6 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply from: "${project.projectDir.absoluteFile}\\dependencyConfig.gradle"
-apply plugin: 'exclude_plugin'
-
-excludePluginExt {
-    aars {
-        BaiduLBS_Android_debug {
-            path "/libs/BaiduLBS_Android_debug.aar"
-            excludePackages 'com.baidu'
-        }
-    }
-}
 
 android {
     compileSdkVersion 29
@@ -67,7 +57,8 @@ android {
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    //这里是为了测试jar，具体实现看dependencyConfig.gradle
+    implementation files(getLibJarSet())
     testImplementation 'junit:junit:4.12'
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"

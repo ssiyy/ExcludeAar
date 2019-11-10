@@ -26,17 +26,18 @@ enum TYPE {
      */
     PROJECT,
     /**
-     *无依赖
+     * 插件依赖依赖
      */
-    NONE
+    PLUGIN
 }
 
 ext {
     //想要修改依赖模式就在这儿修改
-    type = TYPE.NONE
+    type = TYPE.PLUGIN
 
     projectName = "library"
 
+    getLibJarSet = this.&getLibJarSet
     getLibSoSet = this.&getLibSoSet
     getLibAndroidManifestStr = this.&getLibAndroidManifestStr
 }
@@ -58,6 +59,24 @@ private void modelChoose() {
     } else if (type == TYPE.JAR_EXCLUDE) {
         dependencies {
             implementation project(path: ':library-exclude-jar', configuration: 'exclude')
+        }
+    } else if (type == TYPE.PLUGIN) {
+        apply plugin: 'exclude_plugin'
+
+        excludePluginExt {
+            aars {
+                BaiduLBS_Android_debug {
+                    path "/libs/exclude/BaiduLBS_Android_debug.aar"
+                    excludePackages 'com.baidu.android'
+                }
+            }
+
+            jars{
+                BaiduLBS_Android_7_5_2{
+                    path "/libs/exclude/BaiduLBS_Android_7.5.2.jar"
+                    excludePackages 'com.baidu.location','com.baidu.lbsapi'
+                }
+            }
         }
     }
 }
@@ -206,4 +225,19 @@ Set<String> getLibSoSet() {
         }
     }
     return list
+}
+
+/**
+ * 此方法对使用该文件的Project暴露
+ *
+ * 返回所有需要jar的路径
+ * @return 默认不反回任何jar的路径
+ */
+Set<String> getLibJarSet() {
+    //默认不反回任何jar
+    Set<String> set = new HashSet<>()
+    if (type == TYPE.JAR_EXCLUDE || type == TYPE.AAR_EXCLUDE) {
+        set.addAll(fileTree(include: ['*.jar'], dir: 'libs'))
+    }
+    return set
 }
