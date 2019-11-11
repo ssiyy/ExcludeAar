@@ -31,8 +31,8 @@ classpath 'coder.siy:exclude-dependencies-plugin:1.0.0'
     }
 ```
 ## 属性解释
-|:--|:--|:--|
-\**属性名**|**默认值**|**解释**|
+| 属性名 | 默认值 | 解释 |
+|:-:-|:--:|:--:|
 |path|路径|无默认值(必要值)|
 |excludePackages|空数组|需要过滤的包名|
 |excludeClasses|空数组|需要过滤的类名(全类名，不要".class"结尾)|
