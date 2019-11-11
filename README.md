@@ -11,9 +11,9 @@ classpath 'coder.siy:exclude-dependencies-plugin:1.0.0'
  excludePluginExt {
         autoDependencies = true //是否自动依赖即是否依赖过滤之后的架包
         aars {
-            BaiduLBS_Android_debug {
-                path "/libs/exclude/BaiduLBS_Android_debug.aar"
-                excludePackages 'com.baidu.location'
+            BaiduLBS_Android_debug { //过滤架包的名称
+                path "/libs/exclude/BaiduLBS_Android_debug.aar" //架包的路径
+                excludePackages 'com.baidu.location' //过滤的包名
             }
         }
         jars{
@@ -32,7 +32,7 @@ classpath 'coder.siy:exclude-dependencies-plugin:1.0.0'
 ```
 ## 属性解释
 | 属性名 | 默认值 | 解释 |
-|:-:-|:--:|:--:|
+|:--:|:--:|:--:|
 |path|路径|无默认值(必要值)|
 |excludePackages|空数组|需要过滤的包名|
 |excludeClasses|空数组|需要过滤的类名(全类名，不要".class"结尾)|
