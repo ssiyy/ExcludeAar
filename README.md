@@ -30,6 +30,10 @@ classpath 'coder.siy:exclude-dependencies-plugin:1.0.0'
         }
     }
 ```
+## 注意：
+配置完之后运行一下根据名称生成的过滤任务
+![gradle.png](./img/gradle.png)
+
 ## 属性解释
 | 属性名 | 默认值 | 解释 |
 |:--:|:--:|:--:|
