@@ -64,23 +64,23 @@ private void modelChoose() {
         apply plugin: 'exclude_plugin'
 
         excludePluginExt {
+            autoDependencies = true //是否自动依赖即是否依赖过滤之后的架包
             aars {
                 BaiduLBS_Android_debug {
                     path "/libs/exclude/BaiduLBS_Android_debug.aar"
                     excludePackages 'com.baidu.location'
                 }
             }
-
             jars{
-                BaiduLBS_Android_7_5_2{
-                    path "/libs/exclude/BaiduLBS_Android_7.5.2.jar"
-                    excludePackages 'com.baidu.android','com.baidu.lbsapi'
+                BaiduLBS_Android_7_5_2{//过滤架包的名称
+                    path "/libs/exclude/BaiduLBS_Android_7.5.2.jar" //架包的路径
+                    excludePackages 'com.baidu.android','com.baidu.lbsapi' //过滤的包名
                 }
 
-                map_baidu{
-                    path "/libs/exclude/map-baidu.jar"
-                    excludePackages "io.dcloud.js.map.adapter"
-                    excludeClasses "io.dcloud.js.map.IFMapDispose","io.dcloud.js.map.JsMapCircle","io.dcloud.js.map.MapJsUtil"
+                map_baidu{//过滤架包的名称
+                    path "/libs/exclude/map-baidu.jar"//架包的路径
+                    excludePackages "io.dcloud.js.map.adapter"//过滤的包名
+                    excludeClasses "io.dcloud.js.map.IFMapDispose","io.dcloud.js.map.JsMapCircle","io.dcloud.js.map.MapJsUtil"//过滤的类名
                 }
             }
         }

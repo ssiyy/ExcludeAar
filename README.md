@@ -1,4 +1,42 @@
 # 用于过滤aar中冲突类(class)和so库的脚本,也可以用来过滤jar中冲突class
+## Jcenter地址
+依赖：
+```grdle
+classpath 'coder.siy:exclude-dependencies-plugin:1.0.0'
+```
+## 使用方法
+```gradle
+ apply plugin: 'exclude_plugin'
+
+ excludePluginExt {
+        autoDependencies = true //是否自动依赖即是否依赖过滤之后的架包
+        aars {
+            BaiduLBS_Android_debug {
+                path "/libs/exclude/BaiduLBS_Android_debug.aar"
+                excludePackages 'com.baidu.location'
+            }
+        }
+        jars{
+            BaiduLBS_Android_7_5_2{//过滤架包的名称
+                path "/libs/exclude/BaiduLBS_Android_7.5.2.jar" //架包的路径
+                excludePackages 'com.baidu.android','com.baidu.lbsapi' //过滤的包名
+            }
+
+            map_baidu{//过滤架包的名称
+                path "/libs/exclude/map-baidu.jar"//架包的路径
+                excludePackages "io.dcloud.js.map.adapter"//过滤的包名
+                excludeClasses "io.dcloud.js.map.IFMapDispose","io.dcloud.js.map.JsMapCircle","io.dcloud.js.map.MapJsUtil"//过滤的类名
+            }
+        }
+    }
+```
+## 属性解释
+|:--|:--|:--|
+\**属性名**|**默认值**|**解释**|
+|path|路径|无默认值(必要值)|
+|excludePackages|空数组|需要过滤的包名|
+|excludeClasses|空数组|需要过滤的类名(全类名，不要".class"结尾)|
+|excludeSos|空数组|需要过滤的so名（不要".so"结尾,aar包特有）|
 
 ## Demo截图
 ![demo](./img/demo.png)

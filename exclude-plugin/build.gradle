@@ -28,5 +28,5 @@ dependencies {
 }
 
 
-//apply from: "${project.projectDir.absoluteFile}\\uploadLocal.gradle"
-apply from: "${project.projectDir.absoluteFile}\\uploadJcenter.gradle"
+apply from: "${project.projectDir.absoluteFile}\\uploadLocal.gradle"
+//apply from: "${project.projectDir.absoluteFile}\\uploadJcenter.gradle"
