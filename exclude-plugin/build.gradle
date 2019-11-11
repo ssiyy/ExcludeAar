@@ -26,3 +26,7 @@ dependencies {
     implementation "com.android.tools.build:gradle:3.5.1"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
+
+
+//apply from: "${project.projectDir.absoluteFile}\\uploadLocal.gradle"
+apply from: "${project.projectDir.absoluteFile}\\uploadJcenter.gradle"

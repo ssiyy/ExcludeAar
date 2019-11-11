@@ -1,0 +1,16 @@
+apply plugin: 'com.novoda.bintray-release'//添加
+
+publish {
+    repoName = 'maven' //不指明，默认是上传到maven,指明的话这里的名字需要和你创建的仓库的名字一样
+    userOrg = bintrayUser ////bintray.com你的用户名
+
+    groupId = 'coder.siy'//jcenter上的路径
+    artifactId ='exclude-dependencies-plugin'//项目名称
+    publishVersion = '1.0.0'//版本号
+    desc = '用于过滤aar中冲突类(class)和so库的脚本,也可以用来过滤jar中冲突class'//描述，不重要
+    website = 'https://github.com/Siy-Wu/ExcludeAar'//网站，不重要；尽量模拟github上的地址，例如我这样的；当然你有地址最好了
+
+    bintrayUser = bintrayUser
+    bintrayKey = bintrayKey
+    dryRun = true //dryRun是一个配置参数，当为true的时候，会运行所有的环节，但是不会上传。
+}

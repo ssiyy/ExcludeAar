@@ -1,6 +1,6 @@
 def initGradleEnvironment() {
     Properties properties = new Properties()
-    File propertyFile = new File(rootDir.getAbsolutePath() + "/local.properties")
+    File propertyFile = new File(rootDir.getAbsolutePath() + "/config.properties")
     properties.load(propertyFile.newDataInputStream())
     gradle.ext.baidukey = properties.getProperty('baidukey')
     gradle.ext.keyAlias = properties.getProperty('keyAlias')
@@ -13,4 +13,5 @@ initGradleEnvironment()
 include ':exclude-demo',
         ':libraries:library',
         ':libraries:library-exclude-aar',
-        ':library-exclude-jar'
+        ':library-exclude-jar',
+        'exclude-plugin'

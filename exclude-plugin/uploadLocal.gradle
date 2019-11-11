@@ -1,0 +1,18 @@
+apply plugin: 'maven-publish'
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId 'coder.siy'
+            artifactId 'exclude-dependencies-plugin'
+            version '1.0.0'
+            //若是war包，就写components.web,若是jar包，就写components.java
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url = "..\\repo"
+        }
+    }
+}
