@@ -15,5 +15,5 @@ version_name = "1.0"
 appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat_version" }
 gradle_tools = { module = "com.android.tools.build:gradle", version.ref = "gradle_tools" }
 kotlin_gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin_version" }
-kotlin_stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk7", version.ref = "kotlin_version" }
+kotlin_stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin_version" }
 

@@ -3,5 +3,4 @@
 /.idea
 /.gradle
 /exclude-demo/src/main/merge/
-/gradle.properties
 /local.properties
