@@ -1,4 +1,0 @@
-configurations.maybeCreate("default")
-artifacts.add("default", file('BaiduLBS_Android_debug.aar'))
-
-apply from: "${project.projectDir.absoluteFile}\\excludeAar.gradle"

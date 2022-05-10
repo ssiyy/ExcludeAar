@@ -12,6 +12,4 @@ initGradleEnvironment()
 
 include ':exclude-demo',
         ':libraries:library',
-        ':libraries:library-exclude-aar',
-        ':library-exclude-jar',
         'exclude-plugin'
