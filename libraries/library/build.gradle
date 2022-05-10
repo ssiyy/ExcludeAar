@@ -2,13 +2,11 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 32
+    compileSdkVersion libs.versions.compile.sdk.get().toInteger()
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 32
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        minSdkVersion libs.versions.min.sdk.get().toInteger()
+        targetSdkVersion libs.versions.compile.sdk.get().toInteger()
     }
 
     buildTypes {
@@ -32,7 +30,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.4.1'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation libs.appcompat
+    implementation libs.kotlin.stdlib
 }
 

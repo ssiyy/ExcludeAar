@@ -1,12 +1,10 @@
 buildscript {
-    ext.kotlin_version = '1.5.30'
-
     repositories {
         jcenter()
     }
 
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath libs.kotlin.gradle
     }
 }
 
@@ -22,8 +20,8 @@ repositories {
 dependencies {
     implementation gradleApi()
     //java类自定生成的jar
-    implementation "com.android.tools.build:gradle:7.1.3"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation libs.gradle.tools
+    implementation libs.kotlin.stdlib
 }
 
 

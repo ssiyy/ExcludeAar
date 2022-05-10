@@ -10,6 +10,8 @@ def initGradleEnvironment() {
 
 initGradleEnvironment()
 
+enableFeaturePreview('VERSION_CATALOGS')
+
 include ':exclude-demo',
         ':libraries:library',
         'exclude-plugin'

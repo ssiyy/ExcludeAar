@@ -3,14 +3,14 @@ apply plugin: 'kotlin-android'
 apply plugin: 'exclude_plugin'
 
 android {
-    compileSdkVersion 32
+    compileSdkVersion libs.versions.compile.sdk.get().toInteger()
 
     defaultConfig {
         applicationId "coder.siy.test"
-        minSdkVersion 14
-        targetSdkVersion 32
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion libs.versions.min.sdk.get().toInteger()
+        targetSdkVersion libs.versions.compile.sdk.get().toInteger()
+        versionCode libs.versions.version.code.get().toInteger()
+        versionName libs.versions.version.name.get()
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -47,8 +47,8 @@ android {
 
 dependencies {
     //这里是为了测试jar，具体实现看dependencyConfig.gradle
-    implementation 'androidx.appcompat:appcompat:1.4.1'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation libs.appcompat
+    implementation libs.kotlin.stdlib
 }
 
 excludePluginExt {
