@@ -1,10 +1,6 @@
-if (findProject(':libraries:library')) {
-    evaluationDependsOn(":libraries:library")
-}
-
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+apply plugin: 'exclude_plugin'
 
 android {
     compileSdkVersion 32
@@ -43,12 +39,23 @@ android {
             signingConfig signingConfigs.keyTest
         }
     }
+
+    buildFeatures{
+        viewBinding true
+    }
 }
 
 dependencies {
     //这里是为了测试jar，具体实现看dependencyConfig.gradle
-    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
 
-    implementation project(":libraries:library")
+excludePluginExt {
+    autoDependencies = true //是否自动依赖即是否依赖过滤之后的架包
+    aars {
+        BaiduLBS_Android_debug { //过滤架包的名称
+            path "/libs/BaiduLBS_Android_debug.aar" //架包的路径
+        }
+    }
 }

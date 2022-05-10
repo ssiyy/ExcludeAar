@@ -178,35 +178,53 @@ class ExcludePlugin : Plugin<Project> {
     private lateinit var extParam: ExcludeParamExtension
 
     /**
+     * 文件存在就直接返回，如果不存在就创建
+     */
+    private fun ensureFileExits(file: File) = if (file.exists()) {
+        file
+    } else {
+        if (file.mkdir()) {
+            file
+        } else {
+            project.buildDir
+        }
+    }
+
+    /**
      * 过滤的根目录
      */
     private val excludePlguinRootDir by lazy {
-        File(project.buildDir, "excludePlguin")
+        val rootFile = File(project.buildDir, "excludePlguin")
+        ensureFileExits(rootFile)
     }
 
     /**
      * 解压aar文件存放的目录
      */
     private val unZipAarFile by lazy {
-        File(excludePlguinRootDir, "unzipaar")
+        val file = File(excludePlguinRootDir, "unzipaar")
+        ensureFileExits(file)
     }
 
     private val unZipJarFile by lazy {
-        File(excludePlguinRootDir, "unzipjar")
+        val file = File(excludePlguinRootDir, "unzipjar")
+        ensureFileExits(file)
     }
 
     /**
      * 过滤之后生成的aar包的路径
      */
     private val excludeAarFile by lazy {
-        File(excludePlguinRootDir, "excludeaar")
+        val file = File(excludePlguinRootDir, "excludeaar")
+        ensureFileExits(file)
     }
 
     /**
      * 过滤之后生成jar包的路径
      */
     private val excludeJarFile by lazy {
-        File(excludePlguinRootDir, "excludeJar")
+        val file = File(excludePlguinRootDir, "excludeJar")
+        ensureFileExits(file)
     }
 
     override fun apply(project: Project) {
@@ -419,17 +437,20 @@ class ExcludePlugin : Plugin<Project> {
                 extParam.aars.all { aar ->
                     println("name:${aar.name}")
                     println("path:${aar.path}\n")
-                    println("excludePackages:${aar.excludePackages.fold("") { acc, item ->
-                        "$acc\n$item"
-                    }
+                    println("excludePackages:${
+                        aar.excludePackages.fold("") { acc, item ->
+                            "$acc\n$item"
+                        }
                     }\n")
-                    println("excludeClasses:${aar.excludeClasses.fold("") { acc, item ->
-                        "$acc\n$item"
-                    }
+                    println("excludeClasses:${
+                        aar.excludeClasses.fold("") { acc, item ->
+                            "$acc\n$item"
+                        }
                     }\n")
-                    println("excludeSos:${aar.excludeSos.fold("") { acc, item ->
-                        "$acc\n$item"
-                    }
+                    println("excludeSos:${
+                        aar.excludeSos.fold("") { acc, item ->
+                            "$acc\n$item"
+                        }
                     }\n")
                 }
 
@@ -437,13 +458,15 @@ class ExcludePlugin : Plugin<Project> {
                 extParam.jars.all { jar ->
                     println("name:${jar.name}")
                     println("path:${jar.path}\n")
-                    println("excludePackages:${jar.excludePackages.fold("") { acc, item ->
-                        "$acc\n$item"
-                    }
+                    println("excludePackages:${
+                        jar.excludePackages.fold("") { acc, item ->
+                            "$acc\n$item"
+                        }
                     }\n")
-                    println("excludeClasses:${jar.excludeClasses.fold("") { acc, item ->
-                        "$acc\n$item"
-                    }
+                    println("excludeClasses:${
+                        jar.excludeClasses.fold("") { acc, item ->
+                            "$acc\n$item"
+                        }
                     }\n")
                 }
             }

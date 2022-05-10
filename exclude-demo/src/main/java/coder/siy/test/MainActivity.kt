@@ -8,8 +8,8 @@ import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import coder.siy.test.databinding.ActivityMainBinding
 import com.example.library.BaiduLocationService
-import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -32,20 +32,23 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var locService: BaiduLocationService
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
 
-        tipsTv.run{
+
+        val binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        binding.tipsTv.run {
             movementMethod = ScrollingMovementMethod.getInstance();
             text = tips
         }
 
         locService = BaiduLocationService(this)
         locService.listener = { latitude/*获取纬度信息*/, longitude/*获取经度信息*/, _, locType/*错误码*/ ->
-            latitudeTv.text = "纬度：$latitude"
-            longitudeTv.text = "经度：$longitude"
-            locTypeTv.text = "Code值：$locType"
+            binding.latitudeTv.text = "纬度：$latitude"
+            binding.longitudeTv.text = "经度：$longitude"
+            binding.locTypeTv.text = "Code值：$locType"
         }
     }
 
