@@ -11,8 +11,6 @@ android {
         targetSdkVersion libs.versions.compile.sdk.get().toInteger()
         versionCode libs.versions.version.code.get().toInteger()
         versionName libs.versions.version.name.get()
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
 
