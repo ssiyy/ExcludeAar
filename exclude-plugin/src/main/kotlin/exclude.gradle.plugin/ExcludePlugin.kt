@@ -1,5 +1,6 @@
 package exclude.gradle.plugin
 
+import exclude.gradle.plugin.type.ExcludeAarType
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Plugin
@@ -18,7 +19,7 @@ open class JarExculdeParam
 /**
  * 构造函数必须有一个name:String
  */
-(name: String) {
+    (name: String) {
     /**
      * 文件名称
      */
@@ -140,7 +141,10 @@ class AarExculdeParam(name: String) : JarExculdeParam(name) {
  * }
  *
  */
-open class ExcludeParamExtension @JvmOverloads constructor(project: Project, var autoDependencies: Boolean = true) {
+open class ExcludeParamExtension @JvmOverloads constructor(
+    project: Project,
+    var autoDependencies: Boolean = true
+) {
     val aars = project.container(AarExculdeParam::class.java)
     val jars = project.container(JarExculdeParam::class.java)
 
@@ -228,14 +232,21 @@ class ExcludePlugin : Plugin<Project> {
     }
 
     override fun apply(project: Project) {
-        this.project = project
-        extParam = project.extensions.create("excludePluginExt", ExcludeParamExtension::class.java, project)
-
-        project.afterEvaluate {
-            printlnExcludeMsg()
-            createExclueAarTask(extParam)
-            createExcludeJarTask(extParam)
-        }
+        this.project = project/*
+        project.extensions.create(
+            ExcludeExtension::class.java,
+            "excludePluginExt",
+            ExcludeExtension::class.java,
+            project
+        )*/
+        project.extensions.create("excludePluginExt", ExcludeExtension::class.java, project)
+//        project.extensions.add(ExcludeExtension::class.java,"excludePluginExt",ExcludeExtension(project))
+//        project.afterEvaluate {
+//            printlnExcludeMsg()
+//            createExclueAarTask(extParam)
+//            createExcludeJarTask(extParam)
+        ExcludeAarType(project)
+//        }
     }
 
     private fun createExclueAarTask(extension: ExcludeParamExtension) {
@@ -258,7 +269,14 @@ class ExcludePlugin : Plugin<Project> {
 
             if (extension.autoDependencies) {
                 project.dependencies.run {
-                    implementation(project.files(File(zipAarTask.destinationDir, zipAarTask.archiveName)))
+                    implementation(
+                        project.files(
+                            File(
+                                zipAarTask.destinationDir,
+                                zipAarTask.archiveName
+                            )
+                        )
+                    )
                 }
             }
         }
@@ -274,11 +292,20 @@ class ExcludePlugin : Plugin<Project> {
             unZipJarTask.dependsOn(deleteDirsTask)
             zipJarTask.dependsOn(unZipJarTask)
 
-            (project.tasks.getByName("unzipJar_${it.name?.trim()}") as? AbstractCopyTask)?.from(project.zipTree(it.path))
+            (project.tasks.getByName("unzipJar_${it.name?.trim()}") as? AbstractCopyTask)?.from(
+                project.zipTree(it.path)
+            )
 
             if (extension.autoDependencies) {
                 project.dependencies.run {
-                    implementation(project.files(File(zipJarTask.destinationDir, zipJarTask.archiveName)))
+                    implementation(
+                        project.files(
+                            File(
+                                zipJarTask.destinationDir,
+                                zipJarTask.archiveName
+                            )
+                        )
+                    )
                 }
             }
         }
@@ -301,32 +328,34 @@ class ExcludePlugin : Plugin<Project> {
      * @param extParam aar参数
      */
     private fun createdUnZipAarTask(extParam: AarExculdeParam) =
-            project.task<Copy>("unZipAar_${extParam.name?.trim()}") {
-                //解压aar后存放文件的目录
-                val unZipAarPath = File(unZipAarFile, extParam.name)
-                from(project.zipTree(File(extParam.path)))
-                into(unZipAarPath)
+        project.task<Copy>("unZipAar_${extParam.name?.trim()}") {
+            //解压aar后存放文件的目录
+            val unZipAarPath = File(unZipAarFile, extParam.name)
+            from(project.zipTree(File(extParam.path)))
+            into(unZipAarPath)
 
-                doLast {
-                    val jarFiles = mutableSetOf<File>()
+            doLast {
+                val jarFiles = mutableSetOf<File>()
 
-                    //如果解压的aar包存在就找到它下面的所有jar
-                    if (unZipAarPath.exists()) {
-                        unZipAarPath.walk().filter {
-                            it.extension == "jar"
-                        }.run {
-                            jarFiles.addAll(this)
-                        }
+                //如果解压的aar包存在就找到它下面的所有jar
+                if (unZipAarPath.exists()) {
+                    unZipAarPath.walk().filter {
+                        it.extension == "jar"
+                    }.run {
+                        jarFiles.addAll(this)
                     }
-
-                    (project.tasks.getByName("unzipJar_${extParam.name?.trim()}") as? AbstractCopyTask)?.from(
-                            jarFiles.map {
-                                project.zipTree(it)
-                            })
-
-                    (project.tasks.getByName("deleteJars_${extParam.name?.trim()}") as? Delete)?.delete(jarFiles)
                 }
+
+                (project.tasks.getByName("unzipJar_${extParam.name?.trim()}") as? AbstractCopyTask)?.from(
+                    jarFiles.map {
+                        project.zipTree(it)
+                    })
+
+                (project.tasks.getByName("deleteJars_${extParam.name?.trim()}") as? Delete)?.delete(
+                    jarFiles
+                )
             }
+        }
 
     /**
      * 创建解压jar包的任务
@@ -336,30 +365,37 @@ class ExcludePlugin : Plugin<Project> {
      * @param extParam
      */
     private fun createUnZipJarTask(extParam: JarExculdeParam) =
-            project.task<Copy>("unzipJar_${extParam.name?.trim()}") {
-                into(File(unZipJarFile, extParam.name))
-            }
+        project.task<Copy>("unzipJar_${extParam.name?.trim()}") {
+            into(File(unZipJarFile, extParam.name))
+        }
 
 
     /**
      * 创建删除Jar的任务
      */
     private fun createDeleteJars(extParam: JarExculdeParam) =
-            project.task<Delete>("deleteJars_${extParam.name?.trim()}") {
+        project.task<Delete>("deleteJars_${extParam.name?.trim()}") {
 
-            }
+        }
 
     /**
      * 创建删除目录的任务
      */
     private fun createDeleteDirs(extParam: JarExculdeParam) =
-            project.task<Delete>("deleteDirs_${extParam.name?.trim()}") {
-                if (extParam is AarExculdeParam) {
-                    delete(File(unZipAarFile, extParam.name), File(unZipJarFile, extParam.name), File(excludeAarFile, "${getExcludeAarName(extParam)}.aar"))
-                } else {
-                    delete(File(unZipJarFile, extParam.name), File(excludeJarFile, "${getExcludeJarName(extParam)}.jar"))
-                }
+        project.task<Delete>("deleteDirs_${extParam.name?.trim()}") {
+            if (extParam is AarExculdeParam) {
+                delete(
+                    File(unZipAarFile, extParam.name),
+                    File(unZipJarFile, extParam.name),
+                    File(excludeAarFile, "${getExcludeAarName(extParam)}.aar")
+                )
+            } else {
+                delete(
+                    File(unZipJarFile, extParam.name),
+                    File(excludeJarFile, "${getExcludeJarName(extParam)}.jar")
+                )
             }
+        }
 
 
     /**
@@ -372,26 +408,27 @@ class ExcludePlugin : Plugin<Project> {
      *
      */
     private fun createZipJar(extParam: JarExculdeParam) =
-            project.task<Jar>(if (extParam !is AarExculdeParam) "excludeJar_${extParam.name?.trim()}" else "zipJar_${extParam.name?.trim()}") {
-                if (extParam !is AarExculdeParam) {
-                    group = "excludePlugin"
-                    description = "${extParam.name} exclude ${extParam.excludePackages} and ${extParam.excludeClasses}"
-                    baseName = getExcludeJarName(extParam)
-                    destinationDir = excludeJarFile
-                } else {
-                    //文件名
-                    baseName = "classes"
-                    destinationDir = File(unZipAarFile, extParam.name)
-                }
-
-                //需要打包的资源所在的路径集和
-                from(File(unZipJarFile, extParam.name))
-                //去除路径集下部分的资源
-                exclude(extParam.excludeClassRegex)
-                exclude(extParam.excludePackageRegex)
-                //整理输出的 Jar 文件后缀名
-                extension = "jar"
+        project.task<Jar>(if (extParam !is AarExculdeParam) "excludeJar_${extParam.name?.trim()}" else "zipJar_${extParam.name?.trim()}") {
+            if (extParam !is AarExculdeParam) {
+                group = "excludePlugin"
+                description =
+                    "${extParam.name} exclude ${extParam.excludePackages} and ${extParam.excludeClasses}"
+                baseName = getExcludeJarName(extParam)
+                destinationDir = excludeJarFile
+            } else {
+                //文件名
+                baseName = "classes"
+                destinationDir = File(unZipAarFile, extParam.name)
             }
+
+            //需要打包的资源所在的路径集和
+            from(File(unZipJarFile, extParam.name))
+            //去除路径集下部分的资源
+            exclude(extParam.excludeClassRegex)
+            exclude(extParam.excludePackageRegex)
+            //整理输出的 Jar 文件后缀名
+            extension = "jar"
+        }
 
 
     /**
@@ -402,16 +439,17 @@ class ExcludePlugin : Plugin<Project> {
      *
      */
     private fun createZipAar(extParam: AarExculdeParam) =
-            project.task<Zip>("excludeAar_${extParam.name?.trim()}") {
-                group = "excludePlugin"
-                description = "${extParam.name} exclude ${extParam.excludePackages},${extParam.excludeClasses},${extParam.excludeSoRegex}"
+        project.task<Zip>("excludeAar_${extParam.name?.trim()}") {
+            group = "excludePlugin"
+            description =
+                "${extParam.name} exclude ${extParam.excludePackages},${extParam.excludeClasses},${extParam.excludeSoRegex}"
 
-                baseName = getExcludeAarName(extParam)
-                extension = "aar"
-                from(File(unZipAarFile, extParam.name))
-                exclude(extParam.excludeSoRegex)
-                destinationDir = excludeAarFile
-            }
+            baseName = getExcludeAarName(extParam)
+            extension = "aar"
+            from(File(unZipAarFile, extParam.name))
+            exclude(extParam.excludeSoRegex)
+            destinationDir = excludeAarFile
+        }
 
 
     /**
@@ -435,6 +473,9 @@ class ExcludePlugin : Plugin<Project> {
             it.doLast {
                 println("----------------------------aar-----------------------")
                 extParam.aars.all { aar ->
+
+                    println("这都能调用？？？？？？？？？？？？？？？？？？？？？？？？？？？")
+
                     println("name:${aar.name}")
                     println("path:${aar.path}\n")
                     println("excludePackages:${

@@ -28,11 +28,14 @@ val Project.`android`: LibraryExtension
  * Creates a [Task] with the given [name] and [type], configures it with the given [configuration] action,
  * and adds it to this project tasks container.
  */
-inline fun <reified type : Task> Project.task(name: String, noinline configuration: type.() -> Unit) =
-        task(name, type::class, configuration)
+inline fun <reified type : Task> Project.task(
+    name: String,
+    noinline configuration: type.() -> Unit
+) =
+    task(name, type::class, configuration)
 
 fun <T : Task> Project.task(name: String, type: KClass<T>, configuration: T.() -> Unit) =
-        tasks.create(name, type.java, configuration)
+    tasks.create(name, type.java, configuration)
 
 
 /**
@@ -44,7 +47,7 @@ fun <T : Task> Project.task(name: String, type: KClass<T>, configuration: T.() -
  * @see [DependencyHandler.add]
  */
 fun DependencyHandler.`implementation`(dependencyNotation: Any): Dependency? =
-        add("implementation", dependencyNotation)
+    add("implementation", dependencyNotation)
 
 /**
  * Kotlin extension function for [org.gradle.api.artifacts.dsl.DependencyHandler.project].
@@ -52,4 +55,22 @@ fun DependencyHandler.`implementation`(dependencyNotation: Any): Dependency? =
  * @see org.gradle.api.artifacts.dsl.DependencyHandler.project
  */
 inline fun DependencyHandler.`project`(vararg `notation`: Pair<String, Any?>): Dependency =
-        `project`(mapOf(*`notation`))
+    `project`(mapOf(*`notation`))
+
+
+/**
+ * 可以用来链式执行
+ */
+fun Task.dependOn(task: Task): Task {
+    this.dependsOn(task)
+    return task
+}
+
+
+/**
+ * 顺序执行链式调用
+ */
+fun <F : Task> Task.then(task: F): F {
+    task.dependsOn(this)
+    return task
+}

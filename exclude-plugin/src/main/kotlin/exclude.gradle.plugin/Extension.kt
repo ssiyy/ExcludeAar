@@ -1,5 +1,6 @@
 package exclude.gradle.plugin
 
+import com.android.tools.r8.internal.it
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
@@ -29,14 +30,50 @@ open class JarExcludeParam
      * 文件路径
      */
     var path: String? = null
+
+    /**
+     * 需要过滤的类(需要全类名,不需要.class结尾)
+     */
+    var excludeClasses: List<String> = listOf()
+        set(value) {
+            field = value.map {
+                it.replace('.', '\\').plus(".class")
+            }
+        }
+
+    /**
+     * 过滤的包名
+     */
+    fun excludeClasses(vararg packages: String) {
+        this.excludePackages = packages.toList()
+    }
+
+
+    /**
+     * 需要过滤的包名:['com.baidu']
+     */
+    var excludePackages: List<String> = listOf()
+        set(value) {
+            field = value.map {
+                it.replace('.', '\\').plus("\\**")
+            }
+        }
 }
 
 
 /**
  * 过滤Aar包需要的Extension参数
  */
-class AarExcludeParam(name:String) : JarExcludeParam(name){
-
+class AarExcludeParam(name: String) : JarExcludeParam(name) {
+    /**
+     * 过滤的so文件
+     */
+    var excludeSos: List<String> = listOf()
+        set(value) {
+            field = value.map {
+                "**\\$it.so"
+            }
+        }
 }
 
 /**
@@ -87,18 +124,18 @@ class AarExcludeParam(name:String) : JarExcludeParam(name){
  * }
  *
  */
-class ExcludeExtension @JvmOverloads constructor(
-    project:Project,
-    var autoDependence:Boolean = true
-){
-    val jarParam = project.container(JarExcludeParam::class.java)
-    val aarParam = project.container(AarExcludeParam::class.java)
+open class ExcludeExtension @JvmOverloads constructor(
+    project: Project,
+    var autoDependence: Boolean = true
+) {
+    val jarsParams = project.container(JarExcludeParam::class.java)
+    val aarsParams = project.container(AarExcludeParam::class.java)
 
-    fun  xx(action: Action<NamedDomainObjectContainer<JarExcludeParam>>){
-        action.execute(jarParam)
+    fun jars(action: Action<NamedDomainObjectContainer<JarExcludeParam>>) {
+        action.execute(jarsParams)
     }
 
-    fun yy(action: Action<NamedDomainObjectContainer<AarExcludeParam>>){
-        action.execute(aarParam)
+    fun aars(action: Action<NamedDomainObjectContainer<AarExcludeParam>>) {
+        action.execute(aarsParams)
     }
 }
