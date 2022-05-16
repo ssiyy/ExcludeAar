@@ -50,13 +50,12 @@ dependencies {
 }
 
 excludePluginExt {
-    autoDependence = true //是否自动依赖即是否依赖过滤之后的架包
     aars {
         BaiduLBS_Android_debug { //过滤架包的名称
+            implementation = true
             path = "/libs/BaiduLBS_Android_debug.aar" //架包的路径
-//            excludeClasses  = ['com.baidu.android', 'com.baidu.lbsapi']
-            excludeClasses   'com.baidu.android', 'com.baidu.lbsapi'
-
+//            excludePackages  = ['com.baidu.android', 'com.baidu.lbsapi']
+            excludePackages 'com.baidu.android', 'com.baidu.lbsapi'
         }
     }
 }

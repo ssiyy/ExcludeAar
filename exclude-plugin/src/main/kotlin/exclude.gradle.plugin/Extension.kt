@@ -1,6 +1,5 @@
 package exclude.gradle.plugin
 
-import com.android.tools.r8.internal.it
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
@@ -32,6 +31,11 @@ open class JarExcludeParam
     var path: String? = null
 
     /**
+     * 是否依赖它
+     */
+    var implementation: Boolean = true
+
+    /**
      * 需要过滤的类(需要全类名,不需要.class结尾)
      */
     var excludeClasses: List<String> = listOf()
@@ -44,20 +48,27 @@ open class JarExcludeParam
     /**
      * 过滤的包名
      */
-    fun excludeClasses(vararg packages: String) {
-        this.excludePackages = packages.toList()
+    fun excludeClasses(vararg classes: String) {
+        this.excludeClasses = classes.toList()
     }
-
 
     /**
      * 需要过滤的包名:['com.baidu']
      */
     var excludePackages: List<String> = listOf()
         set(value) {
+            System.err.println("valvlvlv:" + value)
             field = value.map {
                 it.replace('.', '\\').plus("\\**")
             }
         }
+
+    /**
+     * 过滤的包名
+     */
+    fun excludePackages(vararg packages: String) {
+        this.excludePackages = packages.toList()
+    }
 }
 
 
@@ -125,8 +136,7 @@ class AarExcludeParam(name: String) : JarExcludeParam(name) {
  *
  */
 open class ExcludeExtension @JvmOverloads constructor(
-    project: Project,
-    var autoDependence: Boolean = true
+    project: Project
 ) {
     val jarsParams = project.container(JarExcludeParam::class.java)
     val aarsParams = project.container(AarExcludeParam::class.java)

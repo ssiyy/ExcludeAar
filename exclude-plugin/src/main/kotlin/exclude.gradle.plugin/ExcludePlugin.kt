@@ -1,6 +1,7 @@
 package exclude.gradle.plugin
 
 import exclude.gradle.plugin.type.ExcludeAarType
+import exclude.gradle.plugin.type.ExcludeJarType
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Plugin
@@ -246,6 +247,7 @@ class ExcludePlugin : Plugin<Project> {
 //            createExclueAarTask(extParam)
 //            createExcludeJarTask(extParam)
         ExcludeAarType(project)
+        ExcludeJarType(project)
 //        }
     }
 
