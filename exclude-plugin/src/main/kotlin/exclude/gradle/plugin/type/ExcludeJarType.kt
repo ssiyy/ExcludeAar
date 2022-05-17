@@ -2,7 +2,6 @@ package exclude.gradle.plugin.type
 
 import exclude.gradle.plugin.*
 import org.gradle.api.Project
-import org.gradle.api.tasks.AbstractCopyTask
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.api.tasks.bundling.Jar
@@ -68,20 +67,17 @@ open class ExcludeJarType(private val project: Project) {
     }
 
     private fun implementation(extension: JarExcludeParam) {
-        val jarTask =
-            (project.tasks.getByName("ex_jar_${extension.name?.trim()}") as? AbstractCopyTask)
         if (extension.implementation) {
-            jarTask?.doLast {
-                val task = it as AbstractArchiveTask
-                val jarFile = task.destinationDir
-                if (jarFile.exists()) {
-                    project.dependencies.run {
-                        implementation(
-                            project.files(
-                                File(task.destinationDir, task.archiveName)
-                            )
+            val task =
+                (project.tasks.getByName("ex_jar_${extension.name?.trim()}") as? AbstractArchiveTask)
+            val jarFile = task?.destinationDir
+            if (jarFile?.exists() == true) {
+                project.dependencies.run {
+                    implementation(
+                        project.files(
+                            File(task.destinationDir, task.archiveName)
                         )
-                    }
+                    )
                 }
             }
         }

@@ -35,20 +35,18 @@ class ExcludeAarType(private val project: Project) : ExcludeJarType(project) {
     }
 
     private fun implementation(extension: JarExcludeParam) {
-        val jarTask =
-            (project.tasks.getByName("ex_aar_${extension.name?.trim()}") as? AbstractCopyTask)
         if (extension.implementation) {
-            jarTask?.doLast {
-                val task = it as AbstractArchiveTask
-                val jarFile = task.destinationDir
-                if (jarFile.exists()) {
-                    project.dependencies.run {
-                        implementation(
-                            project.files(
-                                File(task.destinationDir, task.archiveName)
-                            )
+            val task =
+                (project.tasks.getByName("ex_aar_${extension.name?.trim()}") as? AbstractArchiveTask)
+            val jarFile = task?.destinationDir
+            if (jarFile?.exists() == true) {
+                System.err.println("文件路径：${task.destinationDir},${task.archiveName}")
+                project.dependencies.run {
+                    implementation(
+                        project.files(
+                            File(task.destinationDir, task.archiveName)
                         )
-                    }
+                    )
                 }
             }
         }

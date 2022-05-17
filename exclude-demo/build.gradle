@@ -44,6 +44,7 @@ android {
 }
 
 dependencies {
+   // implementation fileTree(dir: "libs", include: ["*.jar", "*.aar"])
     //这里是为了测试jar，具体实现看dependencyConfig.gradle
     implementation libs.appcompat
     implementation libs.kotlin.stdlib
@@ -53,9 +54,11 @@ excludePluginExt {
     aars {
         BaiduLBS_Android_debug { //过滤架包的名称
             implementation = true
-            path = "/libs/BaiduLBS_Android_debug.aar" //架包的路径
+           path = "/libs/excludes/BaiduLBS_Android_debug.aar" //架包的路径
 //            excludePackages  = ['com.baidu.android', 'com.baidu.lbsapi']
-            excludePackages 'com.baidu.android', 'com.baidu.lbsapi'
+//            excludePackages 'com.baidu.android', 'com.baidu.lbsapi'
+      //      excludeSos  'liblocSDK7b'
+//            excludeSoAbis 'x86'
         }
     }
 }
