@@ -84,6 +84,30 @@ class AarExcludeParam(name: String) : JarExcludeParam(name) {
                 "**\\$it.so"
             }
         }
+
+    /**
+     * 过滤so包
+     */
+    var excludeSoAbis:List<String> = listOf()
+    set(value) {
+        field = value.map {
+            ("**\\").plus(it.plus("\\**"))
+        }
+    }
+
+    /**
+     * 过滤so
+     */
+    fun excludeSos(vararg so: String) {
+        this.excludeSos = so.toList()
+    }
+
+    /**
+     * 过滤so abi
+     */
+    fun excludeSoAbis(vararg abi: String) {
+        this.excludeSoAbis = abi.toList()
+    }
 }
 
 /**

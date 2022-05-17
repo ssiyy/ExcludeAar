@@ -23,7 +23,7 @@ open class ExcludeJarType(private val project: Project) {
     protected val exPluginRootDir: File
         get() {
             val rootFile = File(project.buildDir, "ex_plugin")
-          return  ensureFileExits(rootFile)
+            return ensureFileExits(rootFile)
         }
 
     /**
@@ -61,8 +61,6 @@ open class ExcludeJarType(private val project: Project) {
     init {
         project.afterEvaluate {
             extension.jarsParams.all {
-                System.err.println("jar name:" + it.name)
-
                 createTaskChain(it)
                 implementation(it)
             }
@@ -93,19 +91,19 @@ open class ExcludeJarType(private val project: Project) {
      * 创建任务链
      */
     private fun createTaskChain(extension: JarExcludeParam) =
-        createUnZipJar(extension).from(project.zipTree(extension.path!!))
-            .then(createExJar(extension))
+        createUnZipJar(extension).apply {
+            from(project.zipTree(extension.path!!))
+        }.then(createExJar(extension).apply {
+            group = "excludePlugin"
+        })
 
     protected fun createUnZipJar(extension: JarExcludeParam) =
         project.task<Copy>("unZip_jar_${extension.name?.trim()}") {
-            group = "excludePlugin"
             into(File(tempJarDir, extension.name!!))
         }
 
     protected fun createExJar(extension: JarExcludeParam) =
         project.task<Jar>("ex_jar_${extension.name?.trim()}") {
-            group = "excludePlugin"
-
             //文件名
             baseName = "classes"
             //输出的目录

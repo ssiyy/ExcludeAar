@@ -28,7 +28,6 @@ class ExcludeAarType(private val project: Project) : ExcludeJarType(project) {
             // each(Closure action)、all(Closure action)，但是一般我们都会用 all(...) 来进行容器的迭代。
             // all(...) 迭代方法的特别之处是，不管是容器内已存在的元素，还是后续任何时刻加进去的元素，都会进行遍历。
             extension.aarsParams.all {
-                System.err.println("aar name:" + it.name)
                 createTaskChain(it)
                 implementation(it)
             }
@@ -75,8 +74,6 @@ class ExcludeAarType(private val project: Project) : ExcludeJarType(project) {
      */
     private fun createUnZipAar(extension: AarExcludeParam) =
         project.task<Copy>("unZip_aar_${extension.name?.trim()}") {
-            group = "excludePlugin"
-
             val unZipAarFile = File(tempAarDir, extension.name!!)
             //解压之后aar的存放目录
             from(project.zipTree(File(extension.path!!)))
@@ -111,16 +108,12 @@ class ExcludeAarType(private val project: Project) : ExcludeJarType(project) {
      */
     private fun createDeleteJars(extension: AarExcludeParam) =
         project.task<Delete>("delete_jars_${extension.name?.trim()}") {
-            group = "excludePlugin"
         }
 
 
     private fun createExAar(extension: AarExcludeParam) =
         project.task<Zip>("ex_aar_${extension.name?.trim()}") {
-
             group = "excludePlugin"
-            description =
-                "${extension.name} exclude ${extension.excludePackages},${extension.excludeClasses},${extension.excludeSos}"
 
             baseName = "ex_${extension.name}"
             setExtension("aar")
@@ -128,6 +121,8 @@ class ExcludeAarType(private val project: Project) : ExcludeJarType(project) {
 
             //需要排除的so
             exclude(extension.excludeSos)
+            exclude(extension.excludeSoAbis)
+
             destinationDir = outputDir
         }
 }
