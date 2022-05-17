@@ -1,13 +1,11 @@
 package exclude.gradle.plugin.type
 
-import exclude.gradle.plugin.AarExcludeParam
-import exclude.gradle.plugin.implementation
-import exclude.gradle.plugin.task
-import exclude.gradle.plugin.then
+import exclude.gradle.plugin.*
 import org.gradle.api.Project
 import org.gradle.api.tasks.AbstractCopyTask
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Delete
+import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.api.tasks.bundling.Zip
 import java.io.File
 
@@ -26,25 +24,33 @@ class ExcludeAarType(private val project: Project) : ExcludeJarType(project) {
     }
 
     init {
-
-
         project.afterEvaluate { _ ->
             // each(Closure action)、all(Closure action)，但是一般我们都会用 all(...) 来进行容器的迭代。
             // all(...) 迭代方法的特别之处是，不管是容器内已存在的元素，还是后续任何时刻加进去的元素，都会进行遍历。
             extension.aarsParams.all {
                 System.err.println("aar name:" + it.name)
-                val aarTask = createTaskChain(it)
+                createTaskChain(it)
+                implementation(it)
+            }
+        }
+    }
 
-                if (it.implementation) {
+    private fun implementation(extension: JarExcludeParam) {
+        val jarTask =
+            (project.tasks.getByName("ex_aar_${extension.name?.trim()}") as? AbstractCopyTask)
+        if (extension.implementation) {
+            jarTask?.doLast {
+                val task = it as AbstractArchiveTask
+                val jarFile = task.destinationDir
+                if (jarFile.exists()) {
                     project.dependencies.run {
                         implementation(
                             project.files(
-                                File(aarTask.destinationDir, aarTask.archiveName)
+                                File(task.destinationDir, task.archiveName)
                             )
                         )
                     }
                 }
-
             }
         }
     }

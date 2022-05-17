@@ -2,8 +2,9 @@ package exclude.gradle.plugin.type
 
 import exclude.gradle.plugin.*
 import org.gradle.api.Project
+import org.gradle.api.tasks.AbstractCopyTask
 import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.Delete
+import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.api.tasks.bundling.Jar
 import java.io.File
 
@@ -19,26 +20,29 @@ open class ExcludeJarType(private val project: Project) {
     /**
      * 插件生存的文件都存放在这个目录下面
      */
-    protected val exPluginRootDir by lazy {
-        val rootFile = File(project.buildDir, "ex_plugin")
-        ensureFileExits(rootFile)
-    }
+    protected val exPluginRootDir: File
+        get() {
+            val rootFile = File(project.buildDir, "ex_plugin")
+          return  ensureFileExits(rootFile)
+        }
 
     /**
      * 解压aar之后文件存放的目录
      */
-    protected val outputDir by lazy {
-        val tempAar = File(exPluginRootDir, "output")
-        ensureFileExits(tempAar)
-    }
+    protected val outputDir: File
+        get() {
+            val tempAar = File(exPluginRootDir, "output")
+            return ensureFileExits(tempAar)
+        }
 
     /**
      * 解压jar之后文件存放的目录
      */
-    protected val tempJarDir by lazy {
-        val tempJar = File(exPluginRootDir, "temp_jar")
-        ensureFileExits(tempJar)
-    }
+    protected val tempJarDir: File
+        get() {
+            val tempJar = File(exPluginRootDir, "temp_jar")
+            return ensureFileExits(tempJar)
+        }
 
 
     /**
@@ -47,7 +51,7 @@ open class ExcludeJarType(private val project: Project) {
     protected fun ensureFileExits(file: File) = if (file.exists()) {
         file
     } else {
-        if (file.mkdir()) {
+        if (file.mkdirs()) {
             file
         } else {
             throw AssertionError("${file.path}创建失败")
@@ -59,12 +63,24 @@ open class ExcludeJarType(private val project: Project) {
             extension.jarsParams.all {
                 System.err.println("jar name:" + it.name)
 
-                val jarTask = createTaskChain(it)
-                if (it.implementation) {
+                createTaskChain(it)
+                implementation(it)
+            }
+        }
+    }
+
+    private fun implementation(extension: JarExcludeParam) {
+        val jarTask =
+            (project.tasks.getByName("ex_jar_${extension.name?.trim()}") as? AbstractCopyTask)
+        if (extension.implementation) {
+            jarTask?.doLast {
+                val task = it as AbstractArchiveTask
+                val jarFile = task.destinationDir
+                if (jarFile.exists()) {
                     project.dependencies.run {
                         implementation(
                             project.files(
-                                File(jarTask.destinationDir, jarTask.archiveName)
+                                File(task.destinationDir, task.archiveName)
                             )
                         )
                     }
@@ -102,16 +118,4 @@ open class ExcludeJarType(private val project: Project) {
             exclude(extension.excludePackages)
             setExtension("jar")
         }
-
-
-    /**
-     * 创建一个删除缓存目录的task
-     */
-    protected fun createDeleteTask() =
-        project.task<Delete>("clear_temp_dir") {
-            group = "excludePlugin"
-            delete(tempJarDir)
-        }
-
-
 }

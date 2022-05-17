@@ -57,7 +57,6 @@ open class JarExcludeParam
      */
     var excludePackages: List<String> = listOf()
         set(value) {
-            System.err.println("valvlvlv:" + value)
             field = value.map {
                 it.replace('.', '\\').plus("\\**")
             }

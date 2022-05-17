@@ -248,6 +248,10 @@ class ExcludePlugin : Plugin<Project> {
 //            createExcludeJarTask(extParam)
         ExcludeAarType(project)
         ExcludeJarType(project)
+
+        project.afterEvaluate {
+            printlnExcludeMsg()
+        }
 //        }
     }
 
@@ -467,7 +471,7 @@ class ExcludePlugin : Plugin<Project> {
     /**
      * 打印信息
      */
-    private fun printlnExcludeMsg() {
+    private fun printlnExcludeMsgxx() {
         project.task("printlnExcludeMsg") {
             it.group = "excludePlugin"
             it.description = "println exclude message"
@@ -501,6 +505,59 @@ class ExcludePlugin : Plugin<Project> {
                 extParam.jars.all { jar ->
                     println("name:${jar.name}")
                     println("path:${jar.path}\n")
+                    println("excludePackages:${
+                        jar.excludePackages.fold("") { acc, item ->
+                            "$acc\n$item"
+                        }
+                    }\n")
+                    println("excludeClasses:${
+                        jar.excludeClasses.fold("") { acc, item ->
+                            "$acc\n$item"
+                        }
+                    }\n")
+                }
+            }
+        }
+    }
+
+
+    /**
+     * 打印信息
+     */
+    private fun printlnExcludeMsg() {
+        val extParam = project.extensions.findByType(ExcludeExtension::class.java)!!
+        project.task("printlnExcludeMsg") {
+            it.group = "excludePlugin"
+            it.description = "println exclude message"
+
+            it.doLast {
+                println("----------------------------aar-----------------------")
+                extParam.aarsParams.all { aar ->
+                    println("name:${aar.name}")
+                    println("path:${aar.path}\n")
+                    println("implementation:${aar.implementation}")
+                    println("excludePackages:${
+                        aar.excludePackages.fold("") { acc, item ->
+                            "$acc\n$item"
+                        }
+                    }\n")
+                    println("excludeClasses:${
+                        aar.excludeClasses.fold("") { acc, item ->
+                            "$acc\n$item"
+                        }
+                    }\n")
+                    println("excludeSos:${
+                        aar.excludeSos.fold("") { acc, item ->
+                            "$acc\n$item"
+                        }
+                    }\n")
+                }
+
+                println("----------------------------jar-----------------------")
+                extParam.jarsParams.all { jar ->
+                    println("name:${jar.name}")
+                    println("path:${jar.path}")
+                    println("implementation:${jar.implementation}\n")
                     println("excludePackages:${
                         jar.excludePackages.fold("") { acc, item ->
                             "$acc\n$item"
