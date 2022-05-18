@@ -4,6 +4,7 @@ import exclude.gradle.plugin.type.ExcludeAarType
 import exclude.gradle.plugin.type.ExcludeJarType
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
 
 /**
  *
@@ -33,8 +34,36 @@ class ExcludePlugin : Plugin<Project> {
         ExcludeJarType(project)
         project.afterEvaluate {
             printlnExcludeMsg()
+
+            createExPluginTasks()
         }
     }
+
+    /**
+     * 所有生产ex jar task
+     */
+    private fun createExPluginTasks() = project.task("excludePluginTask") {
+        it.group = "excludePlugin"
+
+        val tasks = mutableListOf<Task>()
+        val aarTask = project.tasks.findByName("excludeAarPluginTask")
+        if (aarTask != null) {
+            tasks.add(aarTask)
+        }
+        val jarTask = project.tasks.findByName("excludeJarPluginTask")
+        if (jarTask != null) {
+            tasks.add(jarTask)
+        }
+
+        if (tasks.isNotEmpty()) {
+            it.setDependsOn(tasks)
+        }
+
+        it.doFirst {
+            println("exclude plugin 开始执行")
+        }
+    }
+
 
     /**
      * 打印信息

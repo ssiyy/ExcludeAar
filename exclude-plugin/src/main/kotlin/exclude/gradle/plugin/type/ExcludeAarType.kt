@@ -2,6 +2,7 @@ package exclude.gradle.plugin.type
 
 import exclude.gradle.plugin.*
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.tasks.AbstractCopyTask
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Delete
@@ -27,10 +28,29 @@ class ExcludeAarType(private val project: Project) : ExcludeJarType(project) {
         project.afterEvaluate { _ ->
             // each(Closure action)、all(Closure action)，但是一般我们都会用 all(...) 来进行容器的迭代。
             // all(...) 迭代方法的特别之处是，不管是容器内已存在的元素，还是后续任何时刻加进去的元素，都会进行遍历。
+            val allTasks = mutableListOf<Task>()
             extension.aarsParams.all {
-                createTaskChain(it)
+                require(!it.path.isNullOrEmpty()) {
+                    "path 必须不为空:${it.path}"
+                }
+
+                allTasks.add(createTaskChain(it))
                 implementation(it)
             }
+
+            if (allTasks.isNotEmpty()) {
+                createExAarPluginTasks(allTasks)
+            }
+        }
+    }
+
+    /**
+     * 所有生产ex aar task
+     */
+    private fun createExAarPluginTasks(tasks: List<Task>) {
+        project.task("excludeAarPluginTask") {
+            it.group = "excludePlugin"
+            it.setDependsOn(tasks)
         }
     }
 
@@ -108,8 +128,6 @@ class ExcludeAarType(private val project: Project) : ExcludeJarType(project) {
 
     private fun createExAar(extension: AarExcludeParam) =
         project.task<Zip>("ex_aar_${extension.name?.trim()}") {
-            group = "excludePlugin"
-
             baseName = "ex_${extension.name}"
             setExtension("aar")
             from(File(tempAarDir, extension.name!!))

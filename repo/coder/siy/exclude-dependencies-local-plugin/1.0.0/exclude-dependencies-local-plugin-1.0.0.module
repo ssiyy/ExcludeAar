@@ -1,0 +1,80 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "coder.siy",
+    "module": "exclude-dependencies-local-plugin",
+    "version": "1.0.0",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "7.2"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 11,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api",
+        "org.jetbrains.kotlin.localToProject": "public",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "files": [
+        {
+          "name": "exclude-dependencies-local-plugin-1.0.0.jar",
+          "url": "exclude-dependencies-local-plugin-1.0.0.jar",
+          "size": 33399,
+          "sha512": "e4a59e9b9b0df470010a85fae99153fe210428b526c698b65028fe32d70278972beb3dee03b59a0f2a446c773694e27d083a883a8231ece915af19373e5de871",
+          "sha256": "40e3dc76f81ef9b1c49a3fffbc4e20b8dc2c16f6db7e2d9238f1c19153d074e4",
+          "sha1": "4eb950326ad5f657c36f416146e11a947fb6ec22",
+          "md5": "6994e4e5a1bcb765cece22d8630ff2cd"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 11,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.localToProject": "public",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "com.android.tools.build",
+          "module": "gradle",
+          "version": {
+            "requires": "7.1.3"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "1.5.30"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "exclude-dependencies-local-plugin-1.0.0.jar",
+          "url": "exclude-dependencies-local-plugin-1.0.0.jar",
+          "size": 33399,
+          "sha512": "e4a59e9b9b0df470010a85fae99153fe210428b526c698b65028fe32d70278972beb3dee03b59a0f2a446c773694e27d083a883a8231ece915af19373e5de871",
+          "sha256": "40e3dc76f81ef9b1c49a3fffbc4e20b8dc2c16f6db7e2d9238f1c19153d074e4",
+          "sha1": "4eb950326ad5f657c36f416146e11a947fb6ec22",
+          "md5": "6994e4e5a1bcb765cece22d8630ff2cd"
+        }
+      ]
+    }
+  ]
+}

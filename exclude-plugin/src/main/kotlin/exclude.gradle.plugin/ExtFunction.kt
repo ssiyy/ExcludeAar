@@ -1,13 +1,9 @@
 package exclude.gradle.plugin
 
 import com.android.build.gradle.LibraryExtension
-import org.gradle.api.Action
-import org.gradle.api.Incubating
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.artifacts.*
-import org.gradle.api.artifacts.dsl.ArtifactHandler
-import org.gradle.api.artifacts.dsl.DependencyConstraintHandler
+import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.plugins.ExtensionAware
 import kotlin.reflect.KClass
@@ -31,8 +27,7 @@ val Project.`android`: LibraryExtension
 inline fun <reified type : Task> Project.task(
     name: String,
     noinline configuration: type.() -> Unit
-) =
-    task(name, type::class, configuration)
+) = task(name, type::class, configuration)
 
 fun <T : Task> Project.task(name: String, type: KClass<T>, configuration: T.() -> Unit) =
     tasks.create(name, type.java, configuration)

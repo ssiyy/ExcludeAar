@@ -2,6 +2,7 @@ package exclude.gradle.plugin.type
 
 import exclude.gradle.plugin.*
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.api.tasks.bundling.Jar
@@ -59,18 +60,37 @@ open class ExcludeJarType(private val project: Project) {
 
     init {
         project.afterEvaluate {
+            val allTasks = mutableListOf<Task>()
             extension.jarsParams.all {
-                createTaskChain(it)
+                require(!it.path.isNullOrEmpty()) {
+                    "path 必须不为空:${it.path}"
+                }
+                allTasks.add(createTaskChain(it))
                 implementation(it)
+            }
+
+            if(allTasks.isNotEmpty()) {
+                createExJarPluginTasks(allTasks)
             }
         }
     }
+
+    /**
+     * 所有生产ex jar task
+     */
+    private fun createExJarPluginTasks(tasks: List<Task>) {
+        project.task("excludeJarPluginTask") {
+            it.group = "excludePlugin"
+            it.setDependsOn(tasks)
+        }
+    }
+
 
     private fun implementation(extension: JarExcludeParam) {
         if (extension.implementation) {
             val task =
                 (project.tasks.getByName("ex_jar_${extension.name?.trim()}") as? AbstractArchiveTask)
-            val jarFile = File(task?.destinationDir,task!!.archiveName)
+            val jarFile = File(task?.destinationDir, task!!.archiveName)
             if (jarFile.exists()) {
                 project.dependencies.run {
                     implementation(
@@ -87,9 +107,7 @@ open class ExcludeJarType(private val project: Project) {
     private fun createTaskChain(extension: JarExcludeParam) =
         createUnZipJar(extension).apply {
             from(project.zipTree(extension.path!!))
-        }.then(createExJar(extension).apply {
-            group = "excludePlugin"
-        })
+        }.then(createExJar(extension))
 
     protected fun createUnZipJar(extension: JarExcludeParam) =
         project.task<Copy>("unZip_jar_${extension.name?.trim()}") {

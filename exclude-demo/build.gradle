@@ -55,7 +55,7 @@ excludePluginExt {
         BaiduLBS_Android_debug { //过滤架包的名称
             implementation = true
             path = "/libs/excludes/BaiduLBS_Android_debug.aar" //架包的路径
-            excludeClasses 'com.example.library.BaiduLocationService'
+//            excludeClasses 'com.example.library.BaiduLocationService'
 //            excludePackages  = ['com.baidu.android', 'com.baidu.lbsapi']
 //            excludeSos 'liblocSDK7b'
 //            excludeSoAbis 'x86'
