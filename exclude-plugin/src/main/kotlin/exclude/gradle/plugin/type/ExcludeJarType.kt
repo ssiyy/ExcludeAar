@@ -70,13 +70,11 @@ open class ExcludeJarType(private val project: Project) {
         if (extension.implementation) {
             val task =
                 (project.tasks.getByName("ex_jar_${extension.name?.trim()}") as? AbstractArchiveTask)
-            val jarFile = task?.destinationDir
-            if (jarFile?.exists() == true) {
+            val jarFile = File(task?.destinationDir,task!!.archiveName)
+            if (jarFile.exists()) {
                 project.dependencies.run {
                     implementation(
-                        project.files(
-                            File(task.destinationDir, task.archiveName)
-                        )
+                        project.files(jarFile)
                     )
                 }
             }

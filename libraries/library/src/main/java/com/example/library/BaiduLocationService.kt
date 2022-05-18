@@ -29,9 +29,15 @@ class BaiduLocationService(context: Context) {
     var listener: ((Double?, Double?, Float?, Int?) -> Unit)? = null
 
     init {
+
         initOption()
         mLocationClient.registerLocationListener { location ->
-            listener?.invoke(location?.latitude, location?.longitude, location?.radius, location?.locType)
+            listener?.invoke(
+                location?.latitude,
+                location?.longitude,
+                location?.radius,
+                location?.locType
+            )
         }
     }
 
