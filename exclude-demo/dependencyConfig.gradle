@@ -68,19 +68,6 @@ private void modelChoose() {
             aars {
                 BaiduLBS_Android_debug {//过滤架包的名称
                     path "/libs/exclude/BaiduLBS_Android_debug.aar"  //架包的路径
-                    excludePackages 'com.baidu.location' //过滤的包名
-                }
-            }
-            jars{
-                BaiduLBS_Android_7_5_2{//过滤架包的名称
-                    path "/libs/exclude/BaiduLBS_Android_7.5.2.jar" //架包的路径
-                    excludePackages 'com.baidu.android','com.baidu.lbsapi' //过滤的包名
-                }
-
-                map_baidu{//过滤架包的名称
-                    path "/libs/exclude/map-baidu.jar"//架包的路径
-                    excludePackages "io.dcloud.js.map.adapter"//过滤的包名
-                    excludeClasses "io.dcloud.js.map.IFMapDispose","io.dcloud.js.map.JsMapCircle","io.dcloud.js.map.MapJsUtil"//过滤的类名
                 }
             }
         }
