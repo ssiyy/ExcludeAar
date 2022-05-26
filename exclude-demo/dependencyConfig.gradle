@@ -68,6 +68,7 @@ private void modelChoose() {
             aars {
                 BaiduLBS_Android_debug {//过滤架包的名称
                     path "/libs/exclude/BaiduLBS_Android_debug.aar"  //架包的路径
+                    excludeSos  'liblocSDK7b'
                 }
             }
         }
