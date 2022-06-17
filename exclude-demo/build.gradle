@@ -22,7 +22,7 @@ android {
 
         //我用的模拟器
         ndk {
-            abiFilters "x86"
+         //   abiFilters "x86"
         }
     }
 
