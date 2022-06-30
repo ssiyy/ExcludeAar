@@ -1,5 +1,7 @@
 buildscript {
     repositories {
+        mavenCentral()
+        google()
         jcenter()
     }
 
@@ -7,6 +9,8 @@ buildscript {
         classpath libs.kotlin.gradle
     }
 }
+
+apply plugin: 'kotlin'
 
 compileKotlin {
     kotlinOptions.jvmTarget = JavaVersion.VERSION_1_8
@@ -16,11 +20,11 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = JavaVersion.VERSION_1_8
 }
 
-apply plugin: 'kotlin'
-
 repositories {
-    jcenter()
+    mavenLocal()
+    mavenCentral()
     google()
+    jcenter()
 }
 
 sourceSets {
@@ -37,6 +41,5 @@ dependencies {
     implementation libs.gradle.tools
     implementation libs.kotlin.stdlib
 }
-
 
 apply from: "${project.projectDir.absoluteFile}\\uploadLocal.gradle"

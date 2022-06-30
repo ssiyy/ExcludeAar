@@ -4,15 +4,15 @@ publishing {
     publications {
         maven(MavenPublication) {
             groupId 'coder.siy'
-            artifactId 'exclude-dependencies-local-plugin'
-            version '1.0.0'
+            artifactId 'excludeAar'
+            version '1.0.1'
             //若是war包，就写components.web,若是jar包，就写components.java
             from components.java
         }
     }
     repositories {
         maven {
-            url = "..\\repo"
+            url = uri("../repo")
         }
     }
 }
