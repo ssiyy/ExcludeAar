@@ -1,8 +1,16 @@
 [![](https://jitpack.io/v/ssiyy/ExcludeAar.svg)](https://jitpack.io/#ssiyy/ExcludeAar)
 # 用于过滤aar中冲突类(class)和so库的脚本,也可以用来过滤jar中冲突class
-## Jcenter地址
-依赖：
-```grdle
+
+## 依赖：
+```
+allprojects {
+  repositories {
+       maven { url 'https://jitpack.io' }
+    }
+}
+```
+
+```
 classpath 'com.github.ssiyy:ExcludeAar:v1.0.1'
 ```
 ## 使用方法
@@ -41,9 +49,11 @@ classpath 'com.github.ssiyy:ExcludeAar:v1.0.1'
 | 属性名 | 默认值 | 解释 |
 |:--:|:--:|:--:|
 |path|无默认值(必要值)|路径|
+|implementation|true|是否依赖过滤之后的架包|
 |excludePackages|空数组|需要过滤的包名|
 |excludeClasses|空数组|需要过滤的类名(全类名，不要".class"结尾)|
 |excludeSos|空数组|需要过滤的so名（不要".so"结尾,aar包特有）|
+|excludeSoAbis|空数组|需要过滤的so abi|
 
 ## Demo截图
 ![demo](./img/demo.png)
