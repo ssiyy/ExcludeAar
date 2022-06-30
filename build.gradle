@@ -6,14 +6,10 @@ buildscript {
     repositories {
         jcenter()
         google()
-        maven{ url "repo"}
     }
     dependencies {
         classpath libs.gradle.tools
         classpath libs.kotlin.gradle
-
-        classpath 'com.novoda:bintray-release:0.9.1'
-        classpath 'coder.siy:exclude-dependencies-local-plugin:1.0.0'
     }
 }
 

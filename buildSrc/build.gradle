@@ -17,14 +17,6 @@ repositories {
     google()
 }
 
-sourceSets {
-    main {
-        java {
-            srcDirs += ["..\\buildSrc\\src\\main\\kotlin"]
-        }
-    }
-}
-
 dependencies {
     implementation gradleApi()
     //java类自定生成的jar
@@ -34,3 +26,4 @@ dependencies {
 
 
 apply from: "${project.projectDir.absoluteFile}\\uploadLocal.gradle"
+//apply from: "${project.projectDir.absoluteFile}\\uploadJcenter.gradle"
