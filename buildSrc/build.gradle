@@ -8,6 +8,13 @@ buildscript {
     }
 }
 
+compileKotlin {
+    kotlinOptions.jvmTarget = JavaVersion.VERSION_1_8
+}
+
+compileTestKotlin {
+    kotlinOptions.jvmTarget = JavaVersion.VERSION_1_8
+}
 
 
 apply plugin: 'kotlin'
