@@ -1,19 +1,22 @@
+[![](https://jitpack.io/v/ssiyy/ExcludeAar.svg)](https://jitpack.io/#ssiyy/ExcludeAar)
 # 用于过滤aar中冲突类(class)和so库的脚本,也可以用来过滤jar中冲突class
 ## Jcenter地址
 依赖：
 ```grdle
-classpath 'coder.siy:exclude-dependencies-plugin:1.0.0'
+classpath 'com.github.ssiyy:ExcludeAar:v1.0.1'
 ```
 ## 使用方法
 ```gradle
  apply plugin: 'exclude_plugin'
 
  excludePluginExt {
-        autoDependencies = true //是否自动依赖即是否依赖过滤之后的架包
         aars {
             BaiduLBS_Android_debug { //过滤架包的名称
+                implementation = false  //是否依赖过滤之后架包
                 path "/libs/exclude/BaiduLBS_Android_debug.aar" //架包的路径
                 excludePackages 'com.baidu.location' //过滤的包名
+                excludeSos 'liblocSDK7b'
+                excludeSoAbis 'x86'
             }
         }
         jars{
