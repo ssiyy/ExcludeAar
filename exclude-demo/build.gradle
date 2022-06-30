@@ -48,12 +48,14 @@ dependencies {
     //这里是为了测试jar，具体实现看dependencyConfig.gradle
     implementation libs.appcompat
     implementation libs.kotlin.stdlib
+
+    implementation project(":libraries:library")
 }
 
 excludePluginExt {
     aars {
         BaiduLBS_Android_debug { //过滤架包的名称
-            implementation = true
+            implementation = false
             path = "/libs/excludes/BaiduLBS_Android_debug.aar" //架包的路径
 //            excludeClasses 'com.example.library.BaiduLocationService'
 //            excludePackages  = ['com.baidu.android', 'com.baidu.lbsapi']
