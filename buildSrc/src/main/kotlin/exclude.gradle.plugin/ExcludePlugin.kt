@@ -40,7 +40,7 @@ class ExcludePlugin : Plugin<Project> {
     }
 
     /**
-     * 所有生产ex jar task
+     * 所有生产ex aar jar task
      */
     private fun createExPluginTasks() = project.task("excludePluginTask") {
         it.group = "excludePlugin"
